@@ -29,6 +29,7 @@ const BASE_KEY = "tricount-brazil-sync-base-v3";
 const VERSION_KEY = "tricount-brazil-remote-version-v1";
 const PENDING_KEY = "tricount-brazil-pending-v3";
 const GROUP_CODE_KEY = "tricount-brazil-group-code-v1";
+const CODE_VERIFIED_KEY = "tricount-brazil-code-verified-v1";
 const RATE_CACHE_KEY = "tricount-brazil-rate-eur-brl-v1";
 
 const $ = (selector, root = document) => root.querySelector(selector);
@@ -183,9 +184,15 @@ let expenseFilter = "all";
 let expenseExpanded = false;
 let isSaving = false;
 let realtimeClient = null;
-let accessResolver = null;
+let appUnlocked = false;
 let currentRate = parse(localStorage.getItem(RATE_CACHE_KEY));
 
+const appShell = $("#app-shell");
+const accessGate = $("#access-gate");
+const accessForm = $("#access-form");
+const accessCodeInput = $("#access-code");
+const accessError = $("#access-error");
+const accessStatus = $("#access-status");
 const root = $("#view-root");
 const actionDialog = $("#action-dialog");
 const formDialog = $("#form-dialog");
@@ -286,42 +293,9 @@ function addActivity(type, text, entityType = "", entityIdValue = "", snapshot =
 }
 
 async function ensureEditAccess() {
-  if (localStorage.getItem(GROUP_CODE_KEY)) return true;
-  if (accessResolver) return new Promise((resolve) => {
-    const previous = accessResolver;
-    accessResolver = (result) => { previous(result); resolve(result); };
-  });
-
-  formContent.innerHTML = `
-    <header class="dialog-header">
-      <div><p>MODIFICATIONS PARTAGÉES</p><h2 id="form-dialog-title">Code du groupe</h2></div>
-      <button class="icon-button" type="button" data-dialog-close aria-label="Fermer"><i class="ph ph-x"></i></button>
-    </header>
-    <form class="sheet-body code-form" id="code-form">
-      <p class="sheet-intro">Le même code que Marseille est demandé une seule fois sur cet appareil. Il autorise les ajouts et corrections partagés.</p>
-      <label class="field"><span class="field-label">Code à 4 chiffres</span><input class="code-input" id="group-code" type="password" inputmode="numeric" autocomplete="one-time-code" maxlength="4" pattern="[0-9]{4}" placeholder="••••" required /></label>
-      <p class="form-error" id="code-error" hidden>Entre exactement quatre chiffres.</p>
-      <button class="primary-button accent" type="submit">Continuer</button>
-      <p class="sheet-intro">Ce verrou simplifie l’usage à deux ; ce n’est pas une authentification bancaire forte.</p>
-    </form>`;
-  showDialog(formDialog);
-  setTimeout(() => $("#group-code")?.focus(), 50);
-  return new Promise((resolve) => {
-    accessResolver = resolve;
-    $("#code-form").addEventListener("submit", (event) => {
-      event.preventDefault();
-      const code = $("#group-code").value.trim();
-      if (!/^\d{4}$/.test(code)) {
-        $("#code-error").hidden = false;
-        return;
-      }
-      localStorage.setItem(GROUP_CODE_KEY, code);
-      const done = accessResolver;
-      accessResolver = null;
-      closeDialog(formDialog);
-      done?.(true);
-    });
-  });
+  if (appUnlocked && localStorage.getItem(GROUP_CODE_KEY)) return true;
+  lockApp("Entre le code commun pour continuer.");
+  return false;
 }
 
 async function mutate(actorId, eventType, change) {
@@ -342,6 +316,79 @@ function requestHeaders(extra = {}) {
     Authorization: `Bearer ${SUPABASE_KEY}`,
     ...extra,
   };
+}
+
+function setAccessBusy(busy, message = "") {
+  const button = accessForm?.querySelector("button[type='submit']");
+  if (button) {
+    button.disabled = busy;
+    button.querySelector("span").textContent = busy ? "Vérification…" : "Ouvrir l’espace";
+  }
+  if (accessCodeInput) accessCodeInput.disabled = busy;
+  if (message && accessStatus) accessStatus.textContent = message;
+}
+
+function lockApp(message = "Le code restera mémorisé uniquement sur cet appareil.", { clearCode = false } = {}) {
+  appUnlocked = false;
+  if (clearCode) {
+    localStorage.removeItem(GROUP_CODE_KEY);
+    localStorage.removeItem(CODE_VERIFIED_KEY);
+  }
+  $$('dialog[open]').forEach((dialog) => dialog.close());
+  document.body.classList.add("access-locked");
+  appShell.hidden = true;
+  accessGate.hidden = false;
+  accessError.hidden = true;
+  accessStatus.textContent = message;
+  setAccessBusy(false);
+  accessCodeInput.value = "";
+  setTimeout(() => accessCodeInput.focus(), 80);
+}
+
+async function verifyAccessCode(code) {
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/verify_brazil_access_code`, {
+    method: "POST",
+    headers: requestHeaders({ "Content-Type": "application/json", Accept: "application/json" }),
+    body: JSON.stringify({ p_access_code: code }),
+    cache: "no-store",
+  });
+  if (!response.ok) throw new Error("La vérification du code est momentanément indisponible.");
+  return (await response.json()) === true;
+}
+
+function unlockApp(code, { offline = false } = {}) {
+  appUnlocked = true;
+  localStorage.setItem(GROUP_CODE_KEY, code);
+  localStorage.setItem(CODE_VERIFIED_KEY, "server-v1");
+  document.body.classList.remove("access-locked");
+  accessGate.hidden = true;
+  appShell.hidden = false;
+  parseHash();
+  cacheState();
+  render();
+  if (offline) setSync("offline", "Copie locale");
+  else void loadRemote();
+  setTimeout(startRealtime, 800);
+}
+
+async function bootstrapAccess() {
+  lockApp();
+  const storedCode = localStorage.getItem(GROUP_CODE_KEY) || "";
+  if (!/^\d{4}$/.test(storedCode)) return;
+  setAccessBusy(true, "Vérification de cet appareil…");
+  try {
+    if (await verifyAccessCode(storedCode)) {
+      unlockApp(storedCode);
+      return;
+    }
+    lockApp("Le code enregistré n’est plus valide.", { clearCode: true });
+  } catch {
+    if (localStorage.getItem(CODE_VERIFIED_KEY) === "server-v1") {
+      unlockApp(storedCode, { offline: true });
+      return;
+    }
+    lockApp("Une connexion est nécessaire pour vérifier le code la première fois.");
+  }
 }
 
 async function fetchRemoteRow() {
@@ -402,6 +449,7 @@ function resolveConflictDialog(merged, conflicts) {
 }
 
 async function syncPending(eventType = "Synchronisation", actorId = "") {
+  if (!appUnlocked) return;
   if (isSaving) return;
   if (!navigator.onLine) {
     setSync("offline", "Hors ligne");
@@ -463,8 +511,8 @@ async function syncPending(eventType = "Synchronisation", actorId = "") {
     if (!response.ok) {
       const message = result.message || result.hint || "Synchronisation impossible.";
       if (/incorrect/i.test(message)) {
-        localStorage.removeItem(GROUP_CODE_KEY);
-        throw new Error("Code incorrect · ta modification reste sur cet appareil.");
+        lockApp("Le code a été refusé. Ta modification reste enregistrée sur cet appareil.", { clearCode: true });
+        throw new Error("Code incorrect · accès verrouillé.");
       }
       if (/CONFLICT_VERSION/i.test(message)) {
         isSaving = false;
@@ -486,6 +534,7 @@ async function syncPending(eventType = "Synchronisation", actorId = "") {
 }
 
 async function loadRemote() {
+  if (!appUnlocked) return;
   if (!navigator.onLine) {
     setSync("offline", "Hors ligne");
     return;
@@ -510,7 +559,7 @@ async function loadRemote() {
 }
 
 function startRealtime() {
-  if (!window.supabase?.createClient || realtimeClient) return;
+  if (!appUnlocked || !window.supabase?.createClient || realtimeClient) return;
   realtimeClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   realtimeClient
     .channel(`${TRIP_ID}-live`)
@@ -583,17 +632,22 @@ function expenseOriginal(expense) {
 function expenseRow(expense) {
   const payer = memberById(expense.payerId);
   const [icon, tone] = categoryIcon(expense.category);
+  const attachments = [expense.note ? '<i class="ph ph-note" aria-label="Note jointe"></i>' : "", isSafeReceipt(expense.receiptDataUrl) ? '<i class="ph ph-camera" aria-label="Photo jointe"></i>' : ""].join("");
   return `
-    <li class="data-row">
+    <li class="data-row expense-ledger-row">
       <button class="row-open" type="button" data-expense-id="${esc(expense.id)}" aria-label="Ouvrir ${esc(expense.title)}">
+        <time class="ledger-date" datetime="${esc(expense.date)}"><span>${displayDate(expense.date)}</span><small>${displayFullDate(expense.date)}</small></time>
         <span class="row-identity">
           <span class="category-icon category-${tone}"><i class="ph ph-${icon}" aria-hidden="true"></i></span>
           <span class="row-copy">
             <b>${esc(expense.title)}</b>
-            <small>${esc(expense.category || "Autre")} · ${esc(payer.name)} · ${displayDate(expense.date)}</small>
+            <small>${esc(expense.category || "Autre")} <span class="mobile-expense-payer">· ${esc(payer.name)}</span> ${attachments}</small>
           </span>
         </span>
-        <span class="row-amount"><b>${esc(expenseOriginal(expense))}</b>${expense.currency === "BRL" ? `<small>${euro.format(Number(expense.amountEur))}</small>` : ""}</span>
+        <span class="ledger-payer">${avatar(payer)}<span>${esc(payer.name)}</span></span>
+        <span class="ledger-original"><b>${expense.currency === "BRL" ? esc(real.format(Number(expense.amountOriginal))) : "—"}</b><small>montant saisi</small></span>
+        <span class="ledger-eur"><b>${euro.format(Number(expense.amountEur))}</b><small>${expense.currency === "BRL" ? "valeur figée" : "saisi en euros"}</small></span>
+        <i class="ph ph-caret-right ledger-caret" aria-hidden="true"></i>
       </button>
       <button class="row-menu" type="button" data-menu="expense" data-id="${esc(expense.id)}" aria-label="Actions pour ${esc(expense.title)}"><i class="ph ph-dots-three"></i></button>
     </li>`;
@@ -623,7 +677,7 @@ function expenseFilters() {
     ["month-11", "Novembre"],
     ["month-12", "Décembre"],
   ];
-  return `<div class="filter-strip" aria-label="Filtrer les dépenses">${options.map(([value, label]) => `<button class="filter-chip ${expenseFilter === value ? "is-active" : ""}" type="button" data-expense-filter="${value}">${label}</button>`).join("")}</div>`;
+  return `<label class="period-filter"><i class="ph ph-calendar-blank" aria-hidden="true"></i><span class="sr-only">Période des dépenses</span><select data-expense-filter-select aria-label="Période des dépenses">${options.map(([value, label]) => `<option value="${value}" ${expenseFilter === value ? "selected" : ""}>${label}</option>`).join("")}</select><i class="ph ph-caret-down" aria-hidden="true"></i></label>`;
 }
 
 function peopleBalanceList(spaceId) {
@@ -699,13 +753,13 @@ function renderAccounts() {
   const groups = state.spaces.filter((space) => space.type === "group" && !space.archivedAt)
     .sort((a, b) => String(b.date || b.createdAt).localeCompare(String(a.date || a.createdAt)));
   const due = recurringDue();
+  const mainSettlement = suggestSettlements(result.balances)[0];
 
   root.innerHTML = `<div class="accounts-layout">
     <div class="accounts-main">
       <section class="balance-hero" aria-labelledby="balance-title">
         <div class="balance-topline"><span class="balance-context"><i class="ph ph-buildings"></i> Appartement</span><span class="balance-eyebrow">SOLDE ENTRE VOUS</span></div>
-        <h2 class="balance-value ${balanceClass}" id="balance-title">${euro.format(Math.abs(gaspardBalance))}</h2>
-        <p class="balance-copy">${balanceCopy} Les remboursements proposés restent toujours en euros.</p>
+        <div class="balance-content"><div><h2 class="balance-value ${balanceClass}" id="balance-title">${euro.format(Math.abs(gaspardBalance))}</h2><p class="balance-copy">${balanceCopy}</p></div>${mainSettlement ? `<div class="hero-route" aria-label="${esc(memberById(mainSettlement.fromId).name)} rembourse ${esc(memberById(mainSettlement.toId).name)}">${avatar(mainSettlement.fromId)}<span>${esc(memberById(mainSettlement.fromId).name)}</span><i class="ph ph-arrow-right"></i>${avatar(mainSettlement.toId)}<span>${esc(memberById(mainSettlement.toId).name)}</span></div>` : `<div class="hero-route is-settled"><i class="ph ph-check-circle"></i><span>Tout est réglé</span></div>`}</div>
         <div class="metrics">
           <div class="metric"><span>TOTAL</span><b>${euro.format(result.totalEur)}</b></div>
           <div class="metric"><span>DÉPENSES</span><b>${result.expenseCount}</b></div>
@@ -716,9 +770,8 @@ function renderAccounts() {
       ${due.length ? `<section class="recurrence-banner"><div><h3>${due.length} dépense${due.length > 1 ? "s" : ""} récurrente${due.length > 1 ? "s" : ""} à confirmer</h3><p>Rien n’est ajouté sans ta validation.</p></div><button class="secondary-button" type="button" data-review-recurrences>Vérifier</button></section>` : ""}
 
       <section class="section-block">
-        <div class="section-head"><div><h2>Dépenses</h2><p>Tout l’historique, détails à la demande.</p></div><button class="text-button" type="button" data-action="expense">+ Dépense</button></div>
-        ${expenseFilters()}
-        ${shown.length ? `<ul class="data-list">${shown.map(expenseRow).join("")}</ul>` : emptyState("receipt", "Aucune dépense ici", "Ajoute le premier achat en reais ou en euros.", "Ajouter une dépense", "expense")}
+        <div class="section-head ledger-heading"><div><h2>Dépenses</h2><p>BRL d’origine, équivalent EUR figé.</p></div><div class="section-tools">${expenseFilters()}<button class="ledger-add-button" type="button" data-action="expense"><i class="ph ph-plus"></i><span>Dépense</span></button></div></div>
+        ${shown.length ? `<div class="expense-table-header"><span>Date</span><span>Dépense</span><span>Payé par</span><span>Montant BRL</span><span>EUR figé</span><span></span></div><ul class="data-list expense-ledger">${shown.map(expenseRow).join("")}</ul>` : emptyState("receipt", "Aucune dépense ici", "Ajoute le premier achat en reais ou en euros.", "Ajouter une dépense", "expense")}
         ${expenses.length > 6 ? `<button class="load-more" type="button" data-toggle-expenses>${expenseExpanded ? "Réduire l’historique" : `Voir les ${expenses.length} dépenses`}</button>` : ""}
       </section>
 
@@ -732,13 +785,13 @@ function renderAccounts() {
     </div>
 
     <aside class="accounts-rail">
+      <section class="rail-panel settlement-panel">
+        <div class="section-head"><div><h2>Virement conseillé</h2><p>Le minimum nécessaire, en euros.</p></div></div>
+        ${primarySettlement(APARTMENT_ID)}
+      </section>
       <section class="rail-panel">
         <div class="section-head"><div><h2>Bilan individuel</h2><p>Avancé, part et solde.</p></div></div>
         <ul class="people-list">${peopleBalanceList(APARTMENT_ID)}</ul>
-      </section>
-      <section class="rail-panel">
-        <div class="section-head"><div><h2>Virement conseillé</h2><p>Le minimum nécessaire.</p></div></div>
-        ${primarySettlement(APARTMENT_ID)}
       </section>
       <section class="rail-panel">
         <div class="section-head"><div><h2>Par catégorie</h2><p>Tendance simple.</p></div></div>
@@ -936,6 +989,9 @@ function updateChrome() {
   const taskCount = state.tasks.filter((task) => task.type !== "rotating" && !task.archived && !task.completed).length;
   $("#tasks-nav-count").hidden = taskCount === 0;
   $("#tasks-nav-count").textContent = taskCount;
+  const addLabels = { accounts: "Ajouter une dépense", lists: listTab === "shopping" ? "Ajouter un article" : "Ajouter un achat", tasks: "Ajouter une tâche" };
+  $("#desktop-add span").textContent = addLabels[currentView];
+  $("#mobile-add").setAttribute("aria-label", addLabels[currentView]);
 }
 
 function render() {
@@ -971,10 +1027,6 @@ function parseHash() {
   } else if (["#accounts", "#lists", "#tasks"].includes(location.hash)) {
     currentView = location.hash.slice(1);
   }
-}
-
-function openActionDialog() {
-  showDialog(actionDialog);
 }
 
 function formHeader(eyebrow, title, close = true) {
@@ -1045,9 +1097,12 @@ async function openExpenseForm({ expenseId = "", duplicateId = "", spaceId = cur
     formContent.innerHTML = `${formHeader(space.name.toUpperCase(), title)}
       <form id="expense-form">
         <div class="sheet-body">
-          <div class="field-grid">
-            <label class="field wide"><span class="field-label">Montant</span><span class="money-field"><input id="expense-amount" type="number" inputmode="decimal" min="0.01" step="0.01" value="${esc(formDraft.amountOriginal || "")}" placeholder="0,00" required autofocus /><span class="currency-toggle"><button type="button" data-currency="BRL" class="${currency === "BRL" ? "is-active" : ""}">R$</button><button type="button" data-currency="EUR" class="${currency === "EUR" ? "is-active" : ""}">€</button></span></span></label>
-            <label class="field wide"><span class="field-label">Titre</span><input id="expense-title" maxlength="90" value="${esc(formDraft.title || "")}" placeholder="Ex. Courses Condor" required /></label>
+          <div class="expense-form-intro"><span class="form-step">01</span><div><b>Informations essentielles</b><p>Date et catégorie restent visibles dès le départ.</p></div></div>
+          <div class="field-grid essential-fields">
+            <label class="field"><span class="field-label">Date</span><input id="expense-date" type="date" value="${esc(formDraft.date || todayIso())}" required /></label>
+            <label class="field"><span class="field-label">Catégorie</span><select id="expense-category" required>${["Courses", "Transport", "Restaurant", "Sortie", "Appartement", "Abonnement", "Autre"].map((category) => `<option ${category === (formDraft.category || "Courses") ? "selected" : ""}>${category}</option>`).join("")}</select></label>
+            <label class="field wide"><span class="field-label">Dépense</span><input id="expense-title" maxlength="90" value="${esc(formDraft.title || "")}" placeholder="Ex. Courses Condor" required /></label>
+            <label class="field wide"><span class="field-label">Montant et devise</span><span class="money-field"><input id="expense-amount" type="number" inputmode="decimal" min="0.01" step="0.01" value="${esc(formDraft.amountOriginal || "")}" placeholder="0,00" required autofocus /><span class="currency-toggle"><button type="button" data-currency="BRL" class="${currency === "BRL" ? "is-active" : ""}">R$</button><button type="button" data-currency="EUR" class="${currency === "EUR" ? "is-active" : ""}">€</button></span></span></label>
           </div>
           <div class="suggestion-row" style="margin-top:10px">${(state.preferences.recentExpenseLabels || []).slice(0, 5).map((label) => `<button class="suggestion-chip" type="button" data-expense-label="${esc(label)}">${esc(label)}</button>`).join("")}</div>
           <section id="currency-panel" class="form-section">
@@ -1055,15 +1110,13 @@ async function openExpenseForm({ expenseId = "", duplicateId = "", spaceId = cur
               <div class="field-grid" style="margin-top:12px"><label class="field"><span class="field-label">Taux EUR/BRL</span><input id="expense-rate" type="number" min="0.0001" step="0.0001" value="${esc(formDraft.exchangeRate || rate?.rate || "")}" placeholder="Ex. 6,0315" required /></label><label class="field"><span class="field-label">Débit bancaire en € (facultatif)</span><input id="expense-bank-eur" type="number" min="0.01" step="0.01" value="${esc(formDraft.manualAmountEur || "")}" placeholder="Valeur exacte du relevé" /></label></div>` : `<div class="rate-card"><div><b>Montant déjà en euros</b><small>Taux 1 · aucun appel de conversion.</small></div><i class="ph ph-check-circle"></i></div>`}
           </section>
 
-          <section class="form-section"><p class="form-section-title">PAYEUR</p><div class="participant-grid">${people.map((person) => `<button class="participant-toggle ${person.id === payerId ? "is-active" : ""}" type="button" data-payer="${esc(person.id)}">${avatar(person)}<span>${esc(person.name)}</span></button>`).join("")}</div></section>
+          <section class="form-section"><div class="expense-form-intro compact"><span class="form-step">02</span><div><b>Qui paie et qui partage ?</b><p>Les deux résidents sont sélectionnés par défaut.</p></div></div><p class="form-section-title">PAYEUR</p><div class="participant-grid">${people.map((person) => `<button class="participant-toggle ${person.id === payerId ? "is-active" : ""}" type="button" data-payer="${esc(person.id)}">${avatar(person)}<span>${esc(person.name)}</span></button>`).join("")}</div></section>
           <section class="form-section"><div class="sheet-title-row"><p class="form-section-title">PARTAGÉ AVEC</p><button class="text-button" type="button" id="select-everyone">Tout le monde</button></div><div class="participant-grid" id="expense-participants">${people.map((person) => `<button class="participant-toggle ${participantIds.includes(person.id) ? "is-active" : ""}" type="button" data-participant="${esc(person.id)}">${avatar(person)}<span>${esc(person.name)}</span></button>`).join("")}</div><label class="field" style="margin-top:12px"><span class="field-label">Répartition</span><select id="split-mode"><option value="equal" ${splitMode === "equal" ? "selected" : ""}>À parts égales</option><option value="exact" ${splitMode === "exact" ? "selected" : ""}>Montants exacts en €</option><option value="percent" ${splitMode === "percent" ? "selected" : ""}>Pourcentages</option></select></label><div id="split-values-root">${splitValuesMarkup(splitMode, participantIds, splitValueState)}</div></section>
 
-          <details class="details-disclosure" ${editing || formDraft.note || receiptDataUrl ? "open" : ""}><summary>Plus de détails <i class="ph ph-caret-down"></i></summary><div class="field-grid">
-            <label class="field"><span class="field-label">Date</span><input id="expense-date" type="date" value="${esc(formDraft.date || todayIso())}" required /></label>
-            <label class="field"><span class="field-label">Catégorie</span><select id="expense-category">${["Courses", "Transport", "Restaurant", "Sortie", "Appartement", "Abonnement", "Autre"].map((category) => `<option ${category === (formDraft.category || "Courses") ? "selected" : ""}>${category}</option>`).join("")}</select></label>
-            <label class="field wide"><span class="field-label">Note</span><textarea id="expense-note" maxlength="500" placeholder="Facultatif">${esc(formDraft.note || "")}</textarea></label>
-            <label class="receipt-input wide"><input id="expense-receipt" type="file" accept="image/jpeg,image/png,image/webp" />${receiptDataUrl ? `<img class="receipt-preview" src="${receiptDataUrl}" alt="Aperçu du ticket" />` : `<span><i class="ph ph-camera"></i>Ajouter un ticket compressé (facultatif)</span>`}</label>
-          </div><label class="toggle-row"><span><b>Rendre récurrente</b><small>Loyer, internet ou abonnement — confirmation avant chaque création.</small></span><span class="switch"><input id="expense-recurring" type="checkbox" ${formDraft.recurrence ? "checked" : ""}/><span></span></span></label></details>
+          <section class="form-section optional-fields"><div class="expense-form-intro compact"><span class="form-step">03</span><div><b>Facultatif</b><p>Ajoute seulement ce qui sera utile plus tard.</p></div></div><div class="field-grid">
+            <label class="field wide"><span class="field-label">Note</span><textarea id="expense-note" maxlength="500" placeholder="Ex. partagé avec les invités de la soirée">${esc(formDraft.note || "")}</textarea></label>
+            <div class="receipt-field wide"><span class="field-label">Photo du ticket</span><label class="receipt-input"><input id="expense-receipt" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" />${receiptDataUrl ? `<img class="receipt-preview" src="${receiptDataUrl}" alt="Aperçu du ticket" />` : `<span><i class="ph ph-camera"></i>Prendre ou choisir une photo</span>`}</label>${receiptDataUrl ? `<button class="quiet-button remove-receipt" type="button" data-remove-receipt><i class="ph ph-trash"></i> Retirer la photo</button>` : ""}</div>
+          </div><label class="toggle-row"><span><b>Dépense récurrente</b><small>Loyer, internet ou abonnement — chaque création reste confirmée.</small></span><span class="switch"><input id="expense-recurring" type="checkbox" ${formDraft.recurrence ? "checked" : ""}/><span></span></span></label></section>
           <p class="form-error" id="expense-error" hidden></p>
         </div>
         <div class="form-actions"><button class="secondary-button" type="button" data-dialog-close>Annuler</button><button class="primary-button accent" type="submit">${editing ? "Enregistrer" : "Ajouter la dépense"}</button></div>
@@ -1117,6 +1170,11 @@ async function openExpenseForm({ expenseId = "", duplicateId = "", spaceId = cur
       } catch (error) {
         toast(error.message, "error");
       }
+    });
+    $("[data-remove-receipt]")?.addEventListener("click", () => {
+      captureFormDraft();
+      receiptDataUrl = "";
+      renderForm();
     });
     $("#expense-form").addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -1661,6 +1719,13 @@ root.addEventListener("submit", async (event) => {
   await addShoppingItem(input.value);
 });
 
+root.addEventListener("change", (event) => {
+  if (!event.target.matches("[data-expense-filter-select]")) return;
+  expenseFilter = event.target.value;
+  expenseExpanded = false;
+  render();
+});
+
 root.addEventListener("click", async (event) => {
   const target = event.target.closest("button, [data-group-id], [data-person-id], [data-idea-id]");
   if (!target) return;
@@ -1696,12 +1761,17 @@ document.addEventListener("click", async (event) => {
   if (close) {
     const dialog = close.closest("dialog");
     closeDialog(dialog);
-    if (accessResolver) { const resolver = accessResolver; accessResolver = null; resolver(false); }
     return;
   }
   const nav = event.target.closest("[data-view]");
   if (nav) return setView(nav.dataset.view);
-  if (event.target.closest("#desktop-add, #mobile-add")) return openActionDialog();
+  if (event.target.closest("#desktop-add, #mobile-add")) {
+    if (currentView === "accounts") return openExpenseForm({ spaceId: currentSpaceId });
+    if (currentView === "tasks") return openTaskForm();
+    if (listTab === "ideas") return openIdeaForm();
+    $("#shopping-quick-input")?.focus();
+    return;
+  }
   if (event.target.closest("#search-open, #mobile-search-open")) return openSearch();
   if (event.target.closest("#settings-open, #mobile-settings-open")) return openSettings();
   if (event.target.closest("#help-open")) return showDialog(helpDialog);
@@ -1769,34 +1839,59 @@ $("#settings-content").addEventListener("click", async (event) => {
   if (event.target.closest("[data-export-csv]")) download(`tricount-brazil-comptes-${todayIso()}.csv`, expenseCsv(state.expenses, state.members, state.spaces), "text/csv;charset=utf-8");
   if (event.target.closest("[data-export-json]")) download(`tricount-brazil-archive-${todayIso()}.json`, JSON.stringify(state, null, 2), "application/json");
   if (event.target.closest("[data-sync-now]")) syncPending("Synchronisation manuelle", state.updatedBy);
-  if (event.target.closest("[data-forget-code]")) { localStorage.removeItem(GROUP_CODE_KEY); toast("Code oublié sur cet appareil."); }
+  if (event.target.closest("[data-forget-code]")) {
+    lockApp("Le code a été oublié. Entre-le à nouveau pour ouvrir l’espace.", { clearCode: true });
+  }
   if (event.target.closest("[data-open-help]")) { closeDialog(settingsDialog); showDialog(helpDialog); }
 });
 
 document.addEventListener("keydown", (event) => {
-  if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+  if (appUnlocked && (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
     event.preventDefault();
     openSearch();
   }
   if (event.key === "Escape") $(".context-menu")?.remove();
 });
 
-window.addEventListener("online", () => void syncPending("Retour en ligne", state.updatedBy));
+accessForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const code = accessCodeInput.value.trim();
+  accessError.hidden = true;
+  if (!/^\d{4}$/.test(code)) {
+    accessError.textContent = "Entre exactement quatre chiffres.";
+    accessError.hidden = false;
+    accessCodeInput.focus();
+    return;
+  }
+  setAccessBusy(true, "Vérification sécurisée…");
+  try {
+    if (!(await verifyAccessCode(code))) {
+      accessError.textContent = "Ce code n’est pas le bon.";
+      accessError.hidden = false;
+      setAccessBusy(false, "Réessaie avec le code commun.");
+      accessCodeInput.select();
+      return;
+    }
+    unlockApp(code);
+  } catch (error) {
+    accessError.textContent = error.message || "Impossible de vérifier le code.";
+    accessError.hidden = false;
+    setAccessBusy(false, "Vérifie ta connexion puis réessaie.");
+  }
+});
+
+window.addEventListener("online", () => { if (appUnlocked) void syncPending("Retour en ligne", state.updatedBy); });
 window.addEventListener("offline", () => setSync("offline", "Hors ligne"));
 window.addEventListener("focus", () => {
-  if (!isSaving) void loadRemote();
+  if (appUnlocked && !isSaving) void loadRemote();
 });
-window.addEventListener("hashchange", () => { parseHash(); render(); });
+window.addEventListener("hashchange", () => { if (appUnlocked) { parseHash(); render(); } });
 
 if ("serviceWorker" in navigator && location.protocol !== "file:") {
   window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}));
 }
 
-parseHash();
-cacheState();
-render();
-void loadRemote();
-setTimeout(startRealtime, 800);
+void bootstrapAccess();
 setInterval(() => {
-  if (!isSaving && document.visibilityState === "visible") void loadRemote();
+  if (appUnlocked && !isSaving && document.visibilityState === "visible") void loadRemote();
 }, 30_000);

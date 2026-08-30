@@ -1,13 +1,14 @@
-const CACHE = "tricount-brazil-v32";
+const CACHE = "tricount-brazil-v34";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css?v=32",
-  "./app.js?v=32",
+  "./styles.css?v=34",
+  "./app.js?v=34",
   "./core.js",
   "./manifest.webmanifest",
   "./icon-192.png",
   "./icon-512.png",
+  "./brazil-mineral.jpg",
 ];
 
 self.addEventListener("install", (event) => {

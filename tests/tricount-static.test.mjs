@@ -44,7 +44,7 @@ test("privacy, social preview and PWA metadata are complete", async () => {
     .map((match) => match[1])
     .filter((asset) => asset !== "");
   for (const asset of shellAssets) await access(path.join(root, "docs", asset));
-  for (const asset of ["docs/icon-192.png", "docs/icon-512.png", "docs/tricount-brazil-og.png"]) {
+  for (const asset of ["docs/icon-192.png", "docs/icon-512.png", "docs/tricount-brazil-og.png", "docs/brazil-mineral.jpg"]) {
     assert.ok((await stat(path.join(root, asset))).size > 1_000, `${asset} doit être un asset réel`);
   }
 });
@@ -57,6 +57,22 @@ test("browser persistence is Brazil-only", async () => {
   assert.ok(values.every((value) => value.startsWith("tricount-brazil-")));
   assert.match(app, /save_brazil_trip_state/);
   assert.doesNotMatch(app, /save_marseille_trip_state|marseille26-/);
+});
+
+test("the whole interface is protected by a server-verified remembered code", async () => {
+  const [html, app, sql] = await Promise.all([
+    read("docs/index.html"),
+    read("docs/app.js"),
+    read("supabase-brazil-access-gate.sql"),
+  ]);
+  assert.match(html, /id="access-gate"/);
+  assert.match(html, /id="app-shell" hidden/);
+  assert.match(app, /rpc\/verify_brazil_access_code/);
+  assert.match(app, /CODE_VERIFIED_KEY/);
+  assert.match(app, /void bootstrapAccess\(\)/);
+  assert.match(sql, /create or replace function public\.verify_brazil_access_code/);
+  assert.match(sql, /extensions\.crypt/);
+  assert.doesNotMatch(`${html}\n${app}\n${sql}`, /\b2006\b/);
 });
 
 test("the Supabase migration is additive and isolates Marseille", async () => {
