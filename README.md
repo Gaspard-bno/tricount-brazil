@@ -41,8 +41,9 @@ node --check docs/core.js
   valeur EUR figée. Un débit bancaire réel peut remplacer la conversion de
   référence.
 
-La migration additive à appliquer une seule fois est décrite dans
-`supabase-brazil-migration.sql`.
+La migration additive a été appliquée en production le 30 août 2026. Son
+script idempotent reste disponible dans `supabase-brazil-migration.sql` pour
+l’audit et la reprise.
 
 ## Documentation de conception
 
