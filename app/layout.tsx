@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://vacances-marseille-2026.pages.dev"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://tricount-brazil.pages.dev"),
   title: "Marseille 2026 — 9 amis, 1 semaine en grand bleu",
   description: "Le plan de vacances du 9 au 16 août 2026 : Calanques, kayak, karting, plages et nuits marseillaises.",
   openGraph: {

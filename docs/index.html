@@ -1,517 +1,203 @@
 <!doctype html>
-<html lang="fr">
+<html lang="fr" data-theme="dark">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="theme-color" content="#0c2a58" />
-    <title>Marseille 2026 · Programme</title>
-    <link rel="stylesheet" href="styles.css?v=15" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src 'self' data: https://cdn.jsdelivr.net; img-src 'self' data: blob:; connect-src 'self' https://pitmfpsfaekexqqdhizm.supabase.co wss://pitmfpsfaekexqqdhizm.supabase.co https://api.frankfurter.dev; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests" />
+    <meta name="theme-color" content="#070908" />
+    <meta name="description" content="Comptes, listes et tâches partagés de Gaspard et Raphael au Brésil." />
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <meta name="referrer" content="same-origin" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta property="og:title" content="Tricount Brazil" />
+    <meta property="og:description" content="L’appartement bien géré, les comptes toujours clairs." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://gaspard-bno.github.io/tricount-brazil/" />
+    <meta property="og:image" content="https://gaspard-bno.github.io/tricount-brazil/tricount-brazil-og.png" />
+    <meta property="og:image:width" content="2048" />
+    <meta property="og:image:height" content="1360" />
+    <meta property="og:image:alt" content="Tricount Brazil sur un téléphone sombre, éclairé en jaune, vert et bleu." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Tricount Brazil" />
+    <meta name="twitter:description" content="Comptes, listes et tâches partagés au Brésil." />
+    <meta name="twitter:image" content="https://gaspard-bno.github.io/tricount-brazil/tricount-brazil-og.png" />
+    <title>Tricount Brazil</title>
+    <link rel="canonical" href="https://gaspard-bno.github.io/tricount-brazil/" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icon-192.png" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css" />
+    <link rel="stylesheet" href="styles.css?v=32" />
   </head>
   <body>
-    <header class="top">
-      <div class="wrap top-row">
-        <div>
-          <a class="brand" href="index.html"
-            >Marseille 2026 <small>9 → 16 août · 9 personnes</small></a
-          >
-          <p>Organisation du séjour · Cabriès · 2 voitures</p>
-        </div>
-        <nav>
-          <a class="active" href="index.html">Programme</a
-          ><a href="budget.html">Budget</a
-          ><a href="comptes.html">Comptes & notes</a>
+    <a class="skip-link" href="#workspace">Aller au contenu</a>
+    <div class="ambient ambient-yellow" aria-hidden="true"></div>
+    <div class="ambient ambient-green" aria-hidden="true"></div>
+    <div class="ambient ambient-blue" aria-hidden="true"></div>
+
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Navigation principale">
+        <button class="brand" type="button" data-view="accounts" aria-label="Tricount Brazil, Comptes">
+          <span class="brand-mark">TB</span>
+          <span><strong>Tricount</strong><small>Brazil</small></span>
+        </button>
+
+        <nav class="side-nav">
+          <button class="nav-item is-active" type="button" data-view="accounts">
+            <i class="ph ph-wallet" aria-hidden="true"></i><span>Comptes</span>
+          </button>
+          <button class="nav-item" type="button" data-view="lists">
+            <i class="ph ph-list-checks" aria-hidden="true"></i><span>Listes</span>
+            <span class="nav-count" id="shopping-nav-count" hidden>0</span>
+          </button>
+          <button class="nav-item" type="button" data-view="tasks">
+            <i class="ph ph-arrows-clockwise" aria-hidden="true"></i><span>Tâches</span>
+            <span class="nav-count" id="tasks-nav-count" hidden>0</span>
+          </button>
         </nav>
+
+        <div class="sidebar-spacer"></div>
+        <button class="sidebar-action" id="search-open" type="button">
+          <i class="ph ph-magnifying-glass" aria-hidden="true"></i><span>Rechercher</span><kbd>⌘ K</kbd>
+        </button>
+        <button class="sidebar-action" id="settings-open" type="button">
+          <i class="ph ph-sliders-horizontal" aria-hidden="true"></i><span>Réglages</span>
+        </button>
+        <button class="sidebar-action" id="help-open" type="button">
+          <i class="ph ph-question" aria-hidden="true"></i><span>Aide courte</span>
+        </button>
+
+        <div class="sidebar-footer">
+          <div class="resident-stack" aria-label="Gaspard et Raphael">
+            <span class="avatar avatar-yellow" aria-label="Gaspard">G</span>
+            <span class="avatar avatar-blue" aria-label="Raphael">R</span>
+          </div>
+          <button class="sync-compact" id="sync-button" type="button" aria-label="Synchroniser maintenant">
+            <span class="sync-dot"></span>
+            <span id="sync-label">Connexion…</span>
+          </button>
+        </div>
+      </aside>
+
+      <main class="workspace" id="workspace" tabindex="-1">
+        <header class="topbar">
+          <div class="mobile-brand">
+            <span class="brand-mark">TB</span>
+            <span><strong>Tricount Brazil</strong><small id="mobile-context">Appartement</small></span>
+          </div>
+          <div class="view-heading">
+            <p id="view-eyebrow">APPARTEMENT</p>
+            <h1><span class="sr-only">Tricount Brazil — </span><span id="view-title">Comptes</span></h1>
+          </div>
+          <div class="topbar-actions">
+            <button class="icon-button mobile-only" id="mobile-search-open" type="button" aria-label="Rechercher">
+              <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+            </button>
+            <button class="sync-pill" id="sync-pill" type="button" aria-label="État de synchronisation">
+              <span class="sync-dot"></span><span id="sync-pill-label">Connexion…</span>
+            </button>
+            <button class="primary-action desktop-add" id="desktop-add" type="button">
+              <i class="ph ph-plus" aria-hidden="true"></i><span>Ajouter</span>
+            </button>
+          </div>
+        </header>
+
+        <div id="view-root" class="view-root" aria-live="polite"></div>
+      </main>
+
+      <nav class="bottom-nav" aria-label="Navigation principale mobile">
+        <button class="bottom-item is-active" type="button" data-view="accounts">
+          <i class="ph ph-wallet" aria-hidden="true"></i><span>Comptes</span>
+        </button>
+        <button class="bottom-item" type="button" data-view="lists">
+          <i class="ph ph-list-checks" aria-hidden="true"></i><span>Listes</span>
+        </button>
+        <span class="bottom-add-space" aria-hidden="true"></span>
+        <button class="bottom-item" type="button" data-view="tasks">
+          <i class="ph ph-arrows-clockwise" aria-hidden="true"></i><span>Tâches</span>
+        </button>
+        <button class="bottom-item" id="mobile-settings-open" type="button">
+          <i class="ph ph-sliders-horizontal" aria-hidden="true"></i><span>Réglages</span>
+        </button>
+      </nav>
+      <button class="mobile-fab" id="mobile-add" type="button" aria-label="Ajouter">
+        <i class="ph ph-plus" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <dialog class="app-dialog action-dialog" id="action-dialog" aria-labelledby="action-title">
+      <div class="dialog-grabber" aria-hidden="true"></div>
+      <header class="dialog-header">
+        <div><p>AJOUT RAPIDE</p><h2 id="action-title">Qu’est-ce qu’on ajoute ?</h2></div>
+        <button class="icon-button" type="button" data-dialog-close aria-label="Fermer"><i class="ph ph-x"></i></button>
+      </header>
+      <div class="action-grid">
+        <button class="action-choice" type="button" data-action="expense">
+          <span class="action-icon action-icon-yellow"><i class="ph ph-receipt"></i></span>
+          <span><strong>Dépense</strong><small>Montant, payeur, partage</small></span>
+          <i class="ph ph-caret-right"></i>
+        </button>
+        <button class="action-choice" type="button" data-action="purchase">
+          <span class="action-icon action-icon-blue"><i class="ph ph-shopping-bag-open"></i></span>
+          <span><strong>À acheter</strong><small>Course ou achat à décider</small></span>
+          <i class="ph ph-caret-right"></i>
+        </button>
+        <button class="action-choice" type="button" data-action="task">
+          <span class="action-icon action-icon-green"><i class="ph ph-check-circle"></i></span>
+          <span><strong>Tâche</strong><small>Simple ou à tour de rôle</small></span>
+          <i class="ph ph-caret-right"></i>
+        </button>
       </div>
-    </header>
-    <main class="wrap main">
-      <figure
-        class="trip-hero"
-        role="img"
-        aria-label="Crique méditerranéenne inspirée des Calanques"
-      >
-        <figcaption>
-          <span>MARSEILLE · AOÛT 2026</span><b>La base du séjour</b
-          ><small
-            >Programme, décisions et bons souvenirs — sans planning
-            militaire.</small
-          >
-        </figcaption>
-      </figure>
-      <div class="dashboard-grid">
-        <section class="section dashboard-panel programme-panel">
-        <div class="section-head">
-          <div>
-            <h1>Programme de la semaine</h1>
-            <p>
-              Cliquer sur une journée pour les détails, les préparatifs et les
-              liens utiles.
-            </p>
-          </div>
-          <div class="sync-bar compact" id="sync-status" aria-live="polite">
-            <span class="sync-dot"></span><span>Carnet partagé : connexion…</span>
-          </div>
-        </div>
-        <div class="card program">
-          <details class="day" data-plan="arrival">
-            <summary>
-              <div class="date">DIM<b>09</b></div>
-              <div>
-                <strong>Arrivée & installation</strong
-                ><small>Courses, chambres, piscine, apéro maison</small>
-              </div>
-              <i>léger</i>
-            </summary>
-            <div class="detail">
-              <div class="slots">
-                <p>
-                  <b>MATIN</b>Arrivées, chambres, voitures, règles de la maison.
-                </p>
-                <p>
-                  <b>APRÈS-MIDI</b>Deux équipes courses, puis piscine et
-                  installation.
-                </p>
-                <p>
-                  <b>SOIR</b>Barbecue ou repas maison, jeux. Aucun déplacement.
-                </p>
-              </div>
-              <details class="inside">
-                <summary>Liste de courses & repas simples</summary>
-                <div class="shopping">
-                  <p><b>Objectif :</b> un premier panier simple, qui tient 3 à 4 jours, puis un petit réassort mercredi soir ou jeudi. Ne pas acheter toute la viande, les fruits et le pain pour 8 jours le dimanche.</p>
-                  <p><b>Dimanche soir — barbecue :</b> 2 kg de poulet / merguez, 2 kg de légumes à griller, 4 baguettes, sauces, salade, fruits et un dessert facile. Vérifier avant d’acheter : plancha ou barbecue réellement disponible, charbon/gaz, pinces et grande poubelle.</p>
-                  <p><b>Repas maison très simples :</b> salades de pâtes, riz ou taboulé (plage) · fajitas / wraps · pâtes bolognaise ou pesto · pizzas tortillas · plancha légumes + viande. Garder deux repas « secours » au congélateur ou placard : pâtes + sauce + thon, et pizzas.</p>
-                  <p><b>Petit-déjeuner / pique-niques :</b> café, lait, céréales, confiture, beurre, pain de mie, œufs, fruits, yaourts ; pains wraps, jambon/fromage, thon, tomates, concombre, chips, compotes et fruits faciles à emmener. Préparer les glacières la veille des plages/activités.</p>
-                  <p><b>Boissons & indispensable chaleur :</b> viser au minimum 1,5 L d’eau par personne et par demi-journée dehors ; prendre eau plate/gazeuse, glaçons, sirops/jus, boissons pré-soirée décidées ensemble. Prévoir crème solaire, sopalin, papier toilette, liquide vaisselle, sacs poubelles, aluminium, essuie-tout et éponges.</p>
-                  <p><b>Répartition rapide :</b> 3 personnes alimentation · 2 boissons/glaçons · 2 hygiène/maison · 2 chargement et rangement. Une personne photographie le ticket, le saisit dans les <a href="comptes.html">comptes</a>, puis partage le montant avant de jeter le ticket.</p>
-                </div>
-              </details>
-            </div>
-          </details>
-          <details class="day" data-plan="monday" open>
-            <summary>
-              <div class="date">LUN<b>10</b></div>
-              <div>
-                <strong>Plage + première sortie Marseille</strong
-                ><small>Plage libre, pré-soirée maison, club / rooftop</small>
-              </div>
-              <i>tardif</i>
-            </summary>
-            <div class="detail">
-              <div class="slots">
-                <p>
-                  <b>MATIN</b>Départ libre en matinée : Sainte-Croix, Verdon ou
-                  Rouet selon l’envie et le parking.
-                </p>
-                <p>
-                  <b>APRÈS-MIDI</b>Plage, pique-nique, puis retour quand le
-                  groupe veut se poser avant la soirée.
-                </p>
-                <p>
-                  <b>SOIR</b>Pré-soirée maison puis Marseille. Conducteur sobre
-                  ou retour VTC.
-                </p>
-              </div>
-              <a
-                class="button"
-                target="_blank"
-                href="https://carte-compass.fr/offres_marseille/r2-le-rooftop/"
-                >Offre Compass R2 ↗</a
-              >
-              <details class="inside">
-                <summary>Choisir la plage sans se compliquer la journée</summary>
-                <div class="choice-grid">
-                  <article><b>Sainte-Croix / La Couronne · priorité « sable & journée posée »</b><p>Option Côte Bleue pour le pique-nique, l’eau claire et un décor plus dépaysant. Arriver tôt ; il existe un parking gratuit et une voie verte entre La Couronne et Sainte-Croix, mais le niveau de fréquentation reste à accepter en août.</p><a target="_blank" href="https://www.martigues-tourisme.com/itineraire/la-voie-verte-du-village-de-la-couronne-vers-sainte-croix.html">Infos accès officiel ↗</a></article>
-                  <article><b>Le Rouet · priorité « plage + option nautique »</b><p>Option la plus logique si une partie du groupe veut décider sur place d’un paddle, d’une bouée tractée ou d’un autre extra. Ce n’est pas inclus : vérifier le prestataire, la météo et le prix avant de payer. Prévoir retour tôt pour la soirée.</p><a target="_blank" href="https://www.carrylerouet-tourisme.com/">Infos Carry-le-Rouet ↗</a></article>
-                  <article><b>Pointe Rouge / Bonneveine · priorité « mer puis Marseille »</b><p>Plus pratique si la soirée démarre à Marseille : plage surveillée en saison, port et activités nautiques tout près. En août, parking et circulation sont chargés : partir tôt ou choisir une plage Côte Bleue à la place.</p><a target="_blank" href="https://www.marseille-tourisme.com/vivez-marseille-blog/le-blog-marseille-a-la-carte/ces-7-plages-de-marseille-sont-facilement-accessibles-en-transports-en-commun/">Infos plages Marseille ↗</a></article>
-                </div>
-              </details>
-            </div>
-          </details>
-          <details class="day" data-plan="karting">
-            <summary>
-              <div class="date">MAR<b>11</b></div>
-              <div>
-                <strong>Plage + karting + récupération</strong
-                ><small>Plage libre avant le karting · deux sessions recommandées</small>
-              </div>
-              <i>sport</i>
-            </summary>
-            <div class="detail">
-              <div class="slots">
-                <p><b>MATIN</b>Grasse matinée après le club, puis plage libre ou piscine pour les motivés. Petit-déjeuner tardif, aucune pression.</p>
-                <p>
-                  <b>APRÈS-MIDI</b>Retour de plage et karting en fin d’après-midi : deux sessions recommandées, créneau choisi avec le groupe.
-                </p>
-                <p>
-                  <b>SOIR</b>Repas maison calme, sacs préparés et vérification météo pour le bateau du lendemain.
-                </p>
-              </div>
-              <div class="choice-grid">
-                <article>
-                  <b>Karting de l’Étang · Rognac</b>
-                  <p>Le plus pratique depuis Cabriès. Tarif groupe officiel dès 8 personnes : 19 € / 1 session, 37 € / 2, 50 € / 3 (10 min chacune). Pour vous : 171 €, 333 € ou 450 € hors cagoules à confirmer.</p>
-                  <a target="_blank" href="https://www.karting-rognac.fr/tarifs.html">Tarifs & réservation ↗</a>
-                </article>
-                <article>
-                  <b>Vallée de l’Arc · Trets</b>
-                  <p>Piste extérieure, plus loin que Rognac : alternative si le groupe privilégie le circuit outdoor. Demander un devis 9 personnes, le temps de roulage réel et la politique météo avant d’y aller.</p>
-                  <a target="_blank" href="https://kart-trets.com/">Tarifs & réservation ↗</a>
-                </article>
-              </div>
-              <details class="inside"><summary>Après le karting : préparer le bateau sans alourdir la soirée</summary><div class="shopping"><p><b>Avant de dîner :</b> chacun prépare maillot, serviette, crème, eau, lunettes et sac étanche. Vérifier aussi les deux voitures, le point de rendez-vous, le paiement restant et les 9 participants.</p><p><b>À 18 h :</b> une personne regarde l’état d’accès du lendemain dans l’app Mes Calanques / la Préfecture. Pour une journée rouge, la sortie bateau reste possible mais le débarquement est interdit : demander alors directement l’adaptation prévue par le skipper.</p><a class="button" target="_blank" href="https://www.calanques-parcnational.fr/fr/acces-calanques-risque-incendie">État d’accès officiel ↗</a></div></details>
-            </div>
-          </details>
-          <details class="day" data-plan="boat">
-            <summary>
-              <div class="date">MER<b>12</b></div>
-              <div>
-                <strong>Bateau Calanques — Bleue Évasion</strong
-                ><small>Activité principale · après-midi · 130 € / personne</small>
-              </div>
-              <i>important</i>
-            </summary>
-            <div class="detail">
-              <div class="slots">
-                <p>
-                  <b>MATIN</b>Réveil tranquille, repas léger, sacs préparés.
-                </p>
-                <p>
-                  <b>APRÈS-MIDI</b>Sortie privée : maillot, crème, serviette,
-                  eau, lunettes, sac étanche.
-                </p>
-                <p><b>SOIR</b>Dîner maison calme, pas de club.</p>
-              </div>
-              <details class="inside"><summary>Fiche départ bateau · à préparer la veille</summary><div class="shopping"><p><b>Prestation à confirmer avec Bleue Évasion :</b> vous visez une sortie privée à 130 € / personne ; valider par écrit le bateau, la capacité de 9, le port, l’horaire et la politique météo. Leur page officielle indique qu’un départ Pointe Rouge est conseillé et que le stationnement y est gratuit ; le lieu exact doit primer sur cette indication générale.</p><p><b>Inclus annoncés sur le tarif public :</b> skipper, carburant, baignade, palmes/masque/tuba, combinaisons shorty, boissons fraîches, GoPro et taxe Calanques — à vérifier pour votre privatisation spécifique.</p><p><b>Sac individuel :</b> maillot déjà porté, serviette, crème solaire haute protection, 1,5 L d’eau, lunettes, médicament mal de mer si besoin, petit encas, téléphone protégé. Éviter les objets de valeur et les chaussures fragiles.</p><p><b>Règle Calanques :</b> en risque rouge, pas de débarquement ; ne rien laisser dans l’eau / sur les rochers et ramener tous les déchets.</p><a class="button" target="_blank" href="https://www.bleuevasion.fr/tarifs">Prestations & inclusions ↗</a></div></details>
-              <a
-                class="button"
-                target="_blank"
-                href="https://www.bleuevasion.fr/calanques"
-                >Bleue Évasion ↗</a
-              >
-            </div>
-          </details>
-          <details class="day" data-plan="thursday">
-            <summary>
-              <div class="date">JEU<b>13</b></div>
-              <div>
-                <strong>Plage + journée libre + deuxième sortie Marseille</strong
-                ><small>Plage, piscine ou repos · club facultatif le soir</small>
-              </div>
-              <i>souple</i>
-            </summary>
-            <div class="detail">
-              <div class="slots">
-                <p><b>MATIN</b>Réveil souple après le bateau ; plage, piscine, brunch ou repos.</p>
-                <p>
-                  <b>APRÈS-MIDI</b>Journée plage prolongée, courses d’appoint ou temps libre à la location. Rien d’obligatoire.
-                </p>
-                <p>
-                  <b>SOIR</b>Pré-soirée maison puis Marseille pour les motivés ; sous-groupes calmes libres de rester à la maison.
-                </p>
-              </div>
-              <details class="inside"><summary>Format club #2 : garder une sortie simple</summary><div class="shopping"><p><b>Pré-soirée :</b> repas très simple à la maison, douche, tenue, batterie et enveloppe personnelle. Confirmer le lieu la veille, sans imposer la sortie aux personnes qui préfèrent une soirée calme.</p><p><b>Retour :</b> décider avant de partir qui conduit sobrement ou qui prend un VTC. Garder vendredi souple pour le kayak.</p><a class="button" target="_blank" href="https://carte-compass.fr/offres_marseille/r2-le-rooftop/">Vérifier l’offre Compass R2 ↗</a></div></details>
-            </div>
-          </details>
-          <details class="day" data-plan="kayak">
-            <summary>
-              <div class="date">VEN<b>14</b></div>
-              <div>
-                <strong>Kayak Cassis + récupération</strong
-                ><small>Activité prévue · créneau tardif après le club</small>
-              </div>
-              <i>souple</i>
-            </summary>
-            <div class="detail">
-              <div class="slots">
-                <p>
-                  <b>MATIN</b>Réveil sans pression ; créneau en fin de matinée
-                  ou début d’après-midi selon la soirée de jeudi.
-                </p>
-                <p>
-                  <b>APRÈS-MIDI</b>Kayak, pique-nique, retour piscine / sieste.
-                </p>
-                <p><b>SOIR</b>Repas maison ou bar facultatif.</p>
-              </div>
-              <div class="choice-grid">
-                <article>
-                  <b>Cassis Kayak · option économique</b>
-                  <p>
-                    2026 : biplace 17,50 €/h, triplace 20 €/h. Pour 9 : 3 triplaces / 2 h = 120 € groupe, soit 13,33 € / pers. Matériel, gilets, bidons étanches et briefing annoncés ; réservation obligatoire et savoir nager requis.
-                  </p>
-                  <a target="_blank" href="https://www.cassis-kayak.fr/"
-                    >Tarifs & réservation ↗</a
-                  >
-                </article>
-                <article>
-                  <b>Lo’Kayak · option alternative</b>
-                  <p>
-                    Été 2026 : triplace 60 € / 2 h, matériel inclus. Budget 20 € / pers. à 9. Alternative plus encadrée / structurée ; rendez-vous 30 min avant et les conditions mer peuvent modifier ou annuler la sortie.
-                  </p>
-                  <a
-                    target="_blank"
-                    href="https://www.lokayakcassis.com/fr/tarifs-location"
-                    >Tarifs & réservation ↗</a
-                  >
-                </article>
-              </div>
-            </div>
-          </details>
-          <details class="day" data-plan="casino">
-            <summary>
-              <div class="date">SAM<b>15</b></div>
-              <div>
-                <strong>Plage + piscine + casino Cassis</strong
-                ><small>Dernière soirée · enveloppe jeu personnelle</small>
-              </div>
-              <i>léger</i>
-            </summary>
-            <div class="detail">
-              <div class="slots">
-                <p><b>MATIN</b>Brunch maison, puis plage ou piscine selon l’envie.</p>
-                <p>
-                  <b>APRÈS-MIDI</b>Plage, baignade ou farniente ; aucune réservation, retour suffisamment tôt pour se préparer au casino.
-                </p>
-                <p>
-                  <b>SOIR</b>Casino : pièce d’identité et enveloppe fermée 20 à
-                  50 €.
-                </p>
-              </div>
-              <details class="inside"><summary>Casino : cadre simple pour ne pas exploser le budget</summary><div class="shopping"><p><b>Avant de partir :</b> chacun choisit une enveloppe 20 €, 35 € ou 50 € en espèces / plafond personnel. Aucun avance de groupe pour jouer ; la sortie reste facultative.</p><p><b>Accès :</b> Casino Barrière Cassis, 29 avenue Professeur René Leriche. Les horaires officiels du samedi vont jusqu’à 4 h ; il faut être majeur et venir avec une pièce d’identité. Une tenue correcte est attendue : ne pas venir en tenue de plage.</p><p><b>Retour :</b> décider avant le départ les voitures, le conducteur sobre / VTC et l’heure limite du dernier groupe.</p><a class="button" target="_blank" href="https://www.casinosbarriere.com/cassis">Horaires officiels Casino Barrière ↗</a></div></details>
-            </div>
-          </details>
-          <details class="day" data-plan="departure">
-            <summary>
-              <div class="date">DIM<b>16</b></div>
-              <div>
-                <strong>Rangement & départ</strong
-                ><small
-                  >État des lieux, frigo, poubelles et comptes finaux</small
-                >
-              </div>
-              <i>fin</i>
-            </summary>
-            <div class="detail">
-              <div class="slots">
-                <p>
-                  <b>MATIN</b>Rangement en équipes ; dernières dépenses saisies.
-                </p>
-                <p><b>APRÈS-MIDI</b>Départs.</p>
-                <p>
-                  <b>À FAIRE</b>Cocher les remboursements faits avant de
-                  repartir.
-                </p>
-              </div>
-            </div>
-          </details>
-        </div>
-        </section>
-        <section class="section dashboard-panel activities-panel">
-        <div class="section-head">
-          <div>
-            <h2>Activités prévues</h2>
-            <p>
-              Cliquer sur une fiche pour le mémo utile au moment de réserver ou
-              de préparer le sac.
-            </p>
-          </div>
-        </div>
-        <div class="activity-grid">
-          <details class="card activity-card" data-activity="boat" style="order: 3">
-            <summary>
-              <span>MER. 12</span><b>Bateau Calanques</b
-              ><small>Bleue Évasion · 130 € / pers.</small>
-            </summary>
-            <div>
-              <p>
-                <b>Vérifié :</b> circuit Calanques et matériel snorkeling annoncés par l’opérateur. <b>À confirmer :</b> privatisation à 9, port, horaire exact, paiement restant et adaptation météo.
-              </p>
-              <p>
-                <b>À prendre :</b> maillot, serviette, eau, crème solaire,
-                lunettes et sac étanche.
-              </p>
-              <a target="_blank" href="https://www.bleuevasion.fr/calanques"
-                >Voir Bleue Évasion ↗</a
-              >
-            </div>
-          </details>
-          <details class="card activity-card" data-activity="karting" style="order: 2">
-            <summary>
-              <span>MAR. 11</span><b>Karting</b
-              ><small>Fin d’après-midi · 1 ou 2 sessions</small>
-            </summary>
-            <div>
-              <p>
-                <b>Option recommandée :</b> Karting de l’Étang, Rognac. Groupe dès 8 : 19 € / 37 € / 50 € pour 1 / 2 / 3 sessions de 10 min. Choix proposé : 2 sessions, 37 € / pers. + cagoule à vérifier.
-              </p>
-              <p><b>À prendre :</b> chaussures fermées et tenue confortable.</p>
-              <a
-                target="_blank"
-                href="https://www.karting-rognac.fr/tarifs.html"
-                >Karting de l’Étang ↗</a
-              ><br /><a target="_blank" href="https://kart-trets.com/"
-                >Alternative Vallée de l’Arc ↗</a
-              >
-            </div>
-          </details>
-          <details class="card activity-card" data-activity="kayak" style="order: 5">
-            <summary>
-              <span>VEN. 14</span><b>Kayak à Cassis</b
-              ><small>2 h recommandées · après une soirée tardive</small>
-            </summary>
-            <div>
-              <p>
-                <b>Option recommandée :</b> 3 triplaces Cassis Kayak, 2 h : 120 € au total, soit 13,33 € / pers. Réservation obligatoire, savoir nager requis ; ne garder Lo’Kayak que si le créneau ou la formule le justifie.
-              </p>
-              <p>
-                <b>À prendre :</b> maillot, eau, crème, serviette et casquette
-                attachée.
-              </p>
-              <a target="_blank" href="https://www.cassis-kayak.fr/"
-                >Cassis Kayak ↗</a
-              ><br /><a
-                target="_blank"
-                href="https://www.lokayakcassis.com/fr/tarifs-location"
-                >Alternative Lo’Kayak ↗</a
-              >
-            </div>
-          </details>
-          <details class="card activity-card" data-activity="club-monday" style="order: 1">
-            <summary>
-              <span>LUN. 10</span><b>Club Marseille · #1</b
-              ><small>Sortie principale · pré-soirée à la maison</small>
-            </summary>
-            <div>
-              <p><b>Format :</b> plage → retour / sieste → pré-soirée maison → Marseille. R2 est une piste officielle ouverte jusqu’au 31 octobre 2026 ; vérifier programmation, entrée et offre Compass juste avant de partir.</p>
-              <p><b>À préparer :</b> conducteurs sobres ou VTC, pièce d’identité, tenue de sortie, batterie et enveloppe individuelle. Une option retour calme est prévue pour qui ne veut pas clubber.</p>
-              <a target="_blank" href="https://carte-compass.fr/offres_marseille/r2-le-rooftop/">Voir l’offre Compass R2 ↗</a>
-            </div>
-          </details>
-          <details class="card activity-card" data-activity="club-thursday" style="order: 4">
-            <summary>
-              <span>JEU. 13</span><b>Club Marseille · #2</b
-              ><small>Après une journée libre · retour libre par sous-groupes</small>
-            </summary>
-            <div>
-              <p><b>Format :</b> journée libre, repas simple / douche, puis sortie seulement pour les motivés. Vendredi est volontairement souple le lendemain.</p>
-              <p><b>Priorité :</b> confirmer le lieu la veille, sans obliger les personnes qui préfèrent une soirée calme. Pré-soirée maison collective ; entrée et boissons en club restent personnelles.</p>
-              <a href="#decisions">Ouvrir la décision clubs & bars ↓</a>
-            </div>
-          </details>
-          <details class="card activity-card" data-activity="casino" style="order: 6">
-            <summary>
-              <span>SAM. 15</span><b>Casino Cassis</b
-              ><small>Soirée facultative · enveloppe jeu 20–50 €</small>
-            </summary>
-            <div>
-              <p><b>Vérifié :</b> Casino Barrière Cassis, ouvert jusqu’à 4 h le samedi. Pièce d’identité obligatoire, tenue correcte demandée ; seulement les majeurs.</p>
-              <p><b>Règle groupe :</b> enveloppe jeu choisie avant de partir : 20–50 €, aucun dépassement à compenser. Le bar / restaurant sans jouer reste une option possible.</p>
-              <a href="#decisions">Ouvrir la décision casino ↓</a>
-            </div>
-          </details>
-          <details class="card activity-card" data-activity="beach" style="order: 7">
-            <summary>
-              <span>LIBRE</span><b>Plage & baignade</b
-              ><small>Lundi + options mardi, jeudi et samedi · Sainte-Croix, La Couronne ou Le Rouet</small>
-            </summary>
-            <div>
-              <p><b>Choix rapide :</b> Sainte-Croix / La Couronne pour une journée plage et pique-nique ; Le Rouet si une activité nautique improvisée tente le groupe ; Pointe Rouge / Bonneveine si la journée enchaîne avec Marseille.</p>
-              <p><b>À préparer :</b> eau, glacière, pique-nique, parasol, crème solaire et sac pour les déchets. Bouée, paddle ou jet-ski : volontaire, prix vérifié avant, jamais à la charge du groupe entier.</p>
-              <a href="#programme">Voir les journées plage ↓</a>
-            </div>
-          </details>
-          <details class="card activity-card" data-activity="bar" style="order: 8">
-            <summary>
-              <span>OPTION</span><b>Bar chill Aix / Marseille</b
-              ><small>Vendredi ou une journée libre · selon l’énergie du groupe</small>
-            </summary>
-            <div>
-              <p><b>Sans réservation pour l’instant :</b> vendredi ou une journée libre selon fatigue. Aix est le choix proche et calme ; Marseille fonctionne mieux si l’un des soirs club se transforme en rooftop / bar.</p>
-              <p><b>Budget :</b> enveloppe personnelle 10–40 € ; une option calme pour le groupe. Compass propose un abonnement mensuel à 2,99 € et des offres à vérifier au moment du choix.</p>
-              <a href="#decisions">Ouvrir la décision clubs & bars ↓</a>
-            </div>
-          </details>
-        </div>
-        </section>
-        <section class="section dashboard-panel decisions-panel" id="decisions">
-        <div class="section-head">
-          <div>
-            <h2>Décisions à prendre</h2>
-            <p>Les seuls choix à trancher ou réserver avant le départ.</p>
-          </div>
-        </div>
-        <div class="decision-grid">
-          <article class="card decision done" data-decision="boat" role="button" tabindex="0">
-            <b>✓ Bateau du mercredi</b>
-            <p>Confirmer horaire, bateau et port de départ exact.</p>
-          </article>
-          <article class="card decision" data-decision="kayak" role="button" tabindex="0">
-            <b>02 · Kayak vendredi</b>
-            <p>Choisir Cassis Kayak ou Lo’Kayak, durée et créneau tardif.</p>
-          </article>
-          <article class="card decision" data-decision="karting" role="button" tabindex="0">
-            <b>03 · Karting mardi</b>
-            <p>Rognac ou Trets, une ou deux sessions, cagoules, créneau.</p>
-          </article>
-          <article class="card decision" data-decision="compass" role="button" tabindex="0">
-            <b>04 · Compass pour tous</b>
-            <p>
-              Chaque personne prend l’abonnement à 2,99 € si les offres retenues
-              le justifient.
-            </p>
-          </article>
-          <article class="card decision" data-decision="retours" role="button" tabindex="0">
-            <b>05 · Retours de soirée</b>
-            <p>
-              Conducteurs sobres ou VTC : qui ne boit pas et qui rentre quand ?
-            </p>
-          </article>
-          <article class="card decision" data-decision="restaurant" role="button" tabindex="0">
-            <b>06 · Restaurant marquant</b>
-            <p>
-              Choisir l’adresse et sa fourchette, sans dépasser le scénario
-              décidé.
-            </p>
-          </article>
-          <article class="card decision" data-decision="sorties" role="button" tabindex="0">
-            <b>07 · Club / bars</b>
-            <p>
-              Choisir les deux soirées et l’enveloppe individuelle de chacun.
-            </p>
-          </article>
-          <article class="card decision" data-decision="courses" role="button" tabindex="0">
-            <b>08 · Courses dimanche</b>
-            <p>
-              Répartir les équipes et le moyen de paiement du premier gros
-              panier.
-            </p>
-          </article>
-        </div>
-        </section>
+    </dialog>
+
+    <dialog class="app-dialog form-dialog" id="form-dialog" aria-labelledby="form-dialog-title">
+      <div class="dialog-grabber" aria-hidden="true"></div>
+      <div id="form-dialog-content"></div>
+    </dialog>
+
+    <dialog class="app-dialog search-dialog" id="search-dialog" aria-labelledby="search-title">
+      <div class="dialog-grabber" aria-hidden="true"></div>
+      <header class="dialog-header search-header">
+        <label class="search-field" for="global-search">
+          <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+          <input id="global-search" type="search" autocomplete="off" placeholder="Dépense, achat, tâche, groupe…" />
+          <kbd>ESC</kbd>
+        </label>
+        <button class="icon-button" type="button" data-dialog-close aria-label="Fermer la recherche"><i class="ph ph-x"></i></button>
+        <h2 class="sr-only" id="search-title">Recherche globale</h2>
+      </header>
+      <div id="search-results" class="search-results"></div>
+    </dialog>
+
+    <dialog class="app-dialog settings-dialog" id="settings-dialog" aria-labelledby="settings-title">
+      <div class="dialog-grabber" aria-hidden="true"></div>
+      <header class="dialog-header">
+        <div><p>TRICOUNT BRAZIL</p><h2 id="settings-title">Réglages</h2></div>
+        <button class="icon-button" type="button" data-dialog-close aria-label="Fermer"><i class="ph ph-x"></i></button>
+      </header>
+      <div id="settings-content"></div>
+    </dialog>
+
+    <dialog class="app-dialog help-dialog" id="help-dialog" aria-labelledby="help-title">
+      <div class="dialog-grabber" aria-hidden="true"></div>
+      <header class="dialog-header">
+        <div><p>EN 60 SECONDES</p><h2 id="help-title">Comment ça marche</h2></div>
+        <button class="icon-button" type="button" data-dialog-close aria-label="Fermer"><i class="ph ph-x"></i></button>
+      </header>
+      <div class="help-list">
+        <article><span>01</span><div><h3>Les virements restent en euros</h3><p>Une dépense en reais garde son montant d’origine, mais sa valeur en euros est figée à l’ajout.</p></div></article>
+        <article><span>02</span><div><h3>Le taux est une référence datée</h3><p>Le dernier taux EUR/BRL de la Banque centrale du Brésil est proposé. Le débit bancaire réel peut le remplacer.</p></div></article>
+        <article><span>03</span><div><h3>Les invités restent dans leur groupe</h3><p>Crée une soirée depuis Comptes. Un invité ne rejoint jamais les comptes permanents de l’Appartement.</p></div></article>
+        <article><span>04</span><div><h3>Le code autorise les modifications</h3><p>La lecture reste simple. Le code commun est demandé au premier changement puis gardé uniquement sur l’appareil.</p></div></article>
       </div>
-      <section class="section notes-panel">
-        <div class="section-head">
-          <div>
-            <h2>Notes du groupe</h2>
-            <p>
-              Listes rapides, infos logement, idées et rappels. Elles sont
-              partagées avec le carnet du groupe.
-            </p>
-          </div>
-        </div>
-        <article class="card note-card">
-          <textarea
-            id="group-notes"
-            placeholder="Ex. Arthur prend les glaçons · réserver le bateau avant…"
-          ></textarea>
-          <button class="primary" id="save-group-notes" type="button">Enregistrer les notes du groupe</button>
-        </article>
-      </section>
-    </main>
-    <footer class="wrap">
-      <span>Marseille 2026 · Organisation du groupe</span
-      ><a href="budget.html">Voir le budget →</a>
-    </footer>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-    <script src="app.js?v=13" defer></script>
+    </dialog>
+
+    <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4" defer></script>
+    <script type="module" src="app.js?v=32"></script>
   </body>
 </html>
