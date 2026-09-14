@@ -1,18 +1,23 @@
 import assert from "node:assert/strict";
-import { access, readFile, stat } from "node:fs/promises";
+import { access, readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 
 const root = path.resolve(import.meta.dirname, "..");
 const read = (file) => readFile(path.join(root, file), "utf8");
 
+/** The Vite build fingerprints the client into docs/assets/index-*.js. */
+async function bundle() {
+  const dir = path.join(root, "docs/assets");
+  const files = (await readdir(dir)).filter((file) => /^index-.*\.js$/.test(file));
+  assert.ok(files.length >= 1, "le build Vite doit émettre docs/assets/index-*.js");
+  const parts = await Promise.all(files.map((file) => readFile(path.join(dir, file), "utf8")));
+  return parts.join("\n");
+}
+
 test("the shipped interface keeps the validated scope and exact names", async () => {
-  const [html, app, core] = await Promise.all([
-    read("docs/index.html"),
-    read("docs/app.js"),
-    read("docs/core.js"),
-  ]);
-  const source = `${html}\n${app}\n${core}`;
+  const [html, app] = await Promise.all([read("docs/index.html"), bundle()]);
+  const source = `${html}\n${app}`;
   assert.match(html, /<strong>Dépense<\/strong>/);
   assert.match(html, /<strong>À acheter<\/strong>/);
   assert.match(html, /<strong>Tâche<\/strong>/);
@@ -40,38 +45,36 @@ test("privacy, social preview and PWA metadata are complete", async () => {
   assert.equal(parsedManifest.name, "Tricount Brazil");
   assert.deepEqual(parsedManifest.icons.map(({ sizes }) => sizes), ["192x192", "512x512"]);
 
-  const shellAssets = [...worker.matchAll(/"\.\/([^"?]+)(?:\?[^" ]+)?"/g)]
-    .map((match) => match[1])
-    .filter((asset) => asset !== "");
-  for (const asset of shellAssets) await access(path.join(root, "docs", asset));
-  for (const asset of ["docs/icon-192.png", "docs/icon-512.png", "docs/tricount-brazil-og.png", "docs/brazil-mineral.jpg"]) {
+  // Every precached shell file must actually exist in the build output.
+  const precache = JSON.parse(`[${worker.match(/const PRECACHE_FILES = \[([^\]]*)\]/)[1]}]`);
+  assert.ok(precache.length >= 3, "le service worker doit précacher le shell");
+  for (const asset of precache) await access(path.join(root, "docs", asset));
+  for (const asset of ["docs/icon-192.png", "docs/icon-512.png", "docs/tricount-brazil-og.png"]) {
     assert.ok((await stat(path.join(root, asset))).size > 1_000, `${asset} doit être un asset réel`);
   }
 });
 
 test("browser persistence is Brazil-only", async () => {
-  const app = await read("docs/app.js");
-  const values = [...app.matchAll(/const (?:CACHE|BASE|VERSION|PENDING|GROUP_CODE|RATE_CACHE)_KEY = "([^"]+)"/g)]
-    .map((match) => match[1]);
-  assert.equal(values.length, 6);
-  assert.ok(values.every((value) => value.startsWith("tricount-brazil-")));
-  assert.match(app, /save_brazil_trip_state/);
-  assert.doesNotMatch(app, /save_marseille_trip_state|marseille26-/);
+  const app = await bundle();
+  assert.match(app, /tricount-brazil-/);
+  assert.match(app, /save_brazil_trip_state_secure/);
+  assert.doesNotMatch(app, /save_marseille_trip_state|marseille-2026|marseille26-/);
 });
 
 test("the whole interface is protected by a server-verified remembered code", async () => {
   const [html, app, sql] = await Promise.all([
     read("docs/index.html"),
-    read("docs/app.js"),
-    read("supabase-brazil-access-gate.sql"),
+    bundle(),
+    read("supabase-brazil-private-bootstrap.sql"),
   ]);
   assert.match(html, /id="access-gate"/);
   assert.match(html, /id="app-shell" hidden/);
-  assert.match(app, /rpc\/verify_brazil_access_code/);
-  assert.match(app, /CODE_VERIFIED_KEY/);
-  assert.match(app, /void bootstrapAccess\(\)/);
-  assert.match(sql, /create or replace function public\.verify_brazil_access_code/);
+  assert.match(app, /rpc\/bootstrap_brazil_trip/);
+  assert.match(app, /server-v1/);
+  assert.match(sql, /create or replace function public\.bootstrap_brazil_trip/);
+  assert.match(sql, /security definer/);
   assert.match(sql, /extensions\.crypt/);
+  assert.match(sql, /RATE_LIMITED/);
   assert.doesNotMatch(`${html}\n${app}\n${sql}`, /\b2006\b/);
 });
 
