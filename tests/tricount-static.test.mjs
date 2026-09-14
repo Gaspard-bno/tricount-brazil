@@ -49,7 +49,7 @@ test("privacy, social preview and PWA metadata are complete", async () => {
   const precache = JSON.parse(`[${worker.match(/const PRECACHE_FILES = \[([^\]]*)\]/)[1]}]`);
   assert.ok(precache.length >= 3, "le service worker doit précacher le shell");
   for (const asset of precache) await access(path.join(root, "docs", asset));
-  for (const asset of ["docs/icon-192.png", "docs/icon-512.png", "docs/tricount-brazil-og.png"]) {
+  for (const asset of ["docs/icon-192.png", "docs/icon-512.png", "docs/tricount-brazil-og.jpg"]) {
     assert.ok((await stat(path.join(root, asset))).size > 1_000, `${asset} doit être un asset réel`);
   }
 });

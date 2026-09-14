@@ -2448,6 +2448,27 @@ body.access-locked {
   background: var(--bg);
 }
 
+.access-gate::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: url("./gate-ambient.webp") center / cover no-repeat;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .access-gate::before {
+    animation: gate-ambient-in 1.2s ease-out both;
+  }
+}
+
+@keyframes gate-ambient-in {
+  from { opacity: 0; }
+  to { opacity: 0.6; }
+}
+
 .access-shell {
   width: min(1120px, 100%);
 }
