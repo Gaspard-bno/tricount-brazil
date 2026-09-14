@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="fr" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://pitmfpsfaekexqqdhizm.supabase.co https://api.frankfurter.dev; object-src 'none'; base-uri 'self'; form-action 'self'" />
+    <meta name="theme-color" content="#070908" />
+    <meta name="description" content="Comptes, listes et tâches partagés de Gaspard et Raphael au Brésil." />
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <meta name="referrer" content="same-origin" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta property="og:title" content="Tricount Brazil" />
+    <meta property="og:description" content="L’appartement bien géré, les comptes toujours clairs." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://gaspard-bno.github.io/tricount-brazil/" />
+    <meta property="og:image" content="https://gaspard-bno.github.io/tricount-brazil/tricount-brazil-og.png" />
+    <meta property="og:image:width" content="2048" />
+    <meta property="og:image:height" content="1360" />
+    <meta property="og:image:alt" content="Tricount Brazil sur un téléphone sombre, éclairé en jaune, vert et bleu." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Tricount Brazil" />
+    <meta name="twitter:description" content="Comptes, listes et tâches partagés au Brésil." />
+    <meta name="twitter:image" content="https://gaspard-bno.github.io/tricount-brazil/tricount-brazil-og.png" />
+    <title>Tricount Brazil</title>
+    <link rel="canonical" href="https://gaspard-bno.github.io/tricount-brazil/" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icon-192.png" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
+    <link rel="stylesheet" href="./icons.css" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body class="access-locked">
+    <a class="skip-link" href="#workspace">Aller au contenu</a>
+    <div class="ambient ambient-yellow" aria-hidden="true"></div>
+    <div class="ambient ambient-green" aria-hidden="true"></div>
+    <div class="ambient ambient-blue" aria-hidden="true"></div>
+
+    <section class="access-gate" id="access-gate" aria-labelledby="access-title">
+      <div class="access-shell">
+        <div class="access-brand" aria-label="Tricount Brazil">
+          <span class="brand-mark">TB</span>
+          <span><strong>Tricount</strong><small>Brazil</small></span>
+        </div>
+        <div class="access-grid">
+          <div class="access-copy">
+            <p class="access-eyebrow">ESPACE PARTAGÉ · GASPARD + RAPHAEL</p>
+            <h1 id="access-title">L’appartement,<br /><span>simplement organisé.</span></h1>
+            <p>Comptes en euros et reais, courses et tâches à tour de rôle. Entre le code commun pour ouvrir votre espace.</p>
+            <form class="access-form" id="access-form">
+              <label for="access-code">Code à 4 chiffres</label>
+              <div class="access-input-row">
+                <input id="access-code" type="password" inputmode="numeric" autocomplete="current-password" maxlength="4" pattern="[0-9]{4}" placeholder="••••" required />
+                <button type="submit"><span>Ouvrir l’espace</span><i class="ph ph-arrow-right" aria-hidden="true"></i></button>
+              </div>
+              <p class="access-error" id="access-error" role="alert" hidden>Ce code n’est pas le bon.</p>
+              <p class="access-status" id="access-status">Le code restera mémorisé uniquement sur cet appareil.</p>
+            </form>
+          </div>
+          <figure class="access-visual">
+            <span class="access-art-mark" aria-hidden="true">TB</span>
+            <figcaption><i class="ph ph-lock-key" aria-hidden="true"></i> Accès privé · données synchronisées</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <div class="app-shell" id="app-shell" hidden>
+      <aside class="sidebar" aria-label="Navigation principale">
+        <button class="brand" type="button" data-view="accounts" aria-label="Tricount Brazil, Comptes">
+          <span class="brand-mark">TB</span>
+          <span><strong>Tricount</strong><small>Brazil</small></span>
+        </button>
+
+        <nav class="side-nav">
+          <button class="nav-item is-active" type="button" data-view="accounts">
+            <i class="ph ph-wallet" aria-hidden="true"></i><span>Comptes</span>
+          </button>
+          <button class="nav-item" type="button" data-view="lists">
+            <i class="ph ph-list-checks" aria-hidden="true"></i><span>Listes</span>
+            <span class="nav-count" id="shopping-nav-count" hidden>0</span>
+          </button>
+          <button class="nav-item" type="button" data-view="tasks">
+            <i class="ph ph-arrows-clockwise" aria-hidden="true"></i><span>Tâches</span>
+            <span class="nav-count" id="tasks-nav-count" hidden>0</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-spacer"></div>
+        <button class="sidebar-action" id="search-open" type="button">
+          <i class="ph ph-magnifying-glass" aria-hidden="true"></i><span>Rechercher</span><kbd>⌘ K</kbd>
+        </button>
+        <button class="sidebar-action" id="settings-open" type="button">
+          <i class="ph ph-sliders-horizontal" aria-hidden="true"></i><span>Réglages</span>
+        </button>
+        <button class="sidebar-action" id="help-open" type="button">
+          <i class="ph ph-question" aria-hidden="true"></i><span>Aide courte</span>
+        </button>
+
+        <div class="sidebar-footer">
+          <div class="resident-stack" aria-label="Gaspard et Raphael">
+            <span class="avatar avatar-yellow" aria-label="Gaspard">G</span>
+            <span class="avatar avatar-blue" aria-label="Raphael">R</span>
+          </div>
+          <button class="sync-compact" id="sync-button" type="button" aria-label="Synchroniser maintenant">
+            <span class="sync-dot"></span>
+            <span id="sync-label">Connexion…</span>
+          </button>
+        </div>
+      </aside>
+
+      <main class="workspace" id="workspace" tabindex="-1">
+        <header class="topbar">
+          <div class="mobile-brand">
+            <span class="brand-mark">TB</span>
+            <span><strong>Tricount Brazil</strong><small id="mobile-context">Appartement</small></span>
+          </div>
+          <div class="view-heading">
+            <p id="view-eyebrow">APPARTEMENT</p>
+            <h1><span class="sr-only">Tricount Brazil — </span><span id="view-title">Comptes</span></h1>
+          </div>
+          <div class="topbar-actions">
+            <button class="icon-button mobile-only" id="mobile-search-open" type="button" aria-label="Rechercher">
+              <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+            </button>
+            <button class="icon-button mobile-only" id="mobile-settings-open" type="button" aria-label="Réglages">
+              <i class="ph ph-sliders-horizontal" aria-hidden="true"></i>
+            </button>
+            <button class="sync-pill" id="sync-pill" type="button" aria-label="État de synchronisation">
+              <span class="sync-dot"></span><span id="sync-pill-label">Connexion…</span>
+            </button>
+            <button class="primary-action desktop-add" id="desktop-add" type="button">
+              <i class="ph ph-plus" aria-hidden="true"></i><span>Ajouter</span>
+            </button>
+          </div>
+        </header>
+
+        <div id="view-root" class="view-root" aria-live="polite"></div>
+      </main>
+
+      <nav class="bottom-nav" aria-label="Navigation principale mobile">
+        <button class="bottom-item is-active" type="button" data-view="accounts">
+          <i class="ph ph-wallet" aria-hidden="true"></i><span>Comptes</span>
+        </button>
+        <button class="bottom-item" type="button" data-view="lists">
+          <i class="ph ph-list-checks" aria-hidden="true"></i><span>Listes</span>
+        </button>
+        <button class="bottom-item" type="button" data-view="tasks">
+          <i class="ph ph-arrows-clockwise" aria-hidden="true"></i><span>Tâches</span>
+        </button>
+      </nav>
+      <button class="mobile-fab" id="mobile-add" type="button" aria-label="Ajouter">
+        <i class="ph ph-plus" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <dialog class="app-dialog action-dialog" id="action-dialog" aria-labelledby="action-title">
+      <div class="dialog-grabber" aria-hidden="true"></div>
+      <header class="dialog-header">
+        <div><p>AJOUT RAPIDE</p><h2 id="action-title">Qu’est-ce qu’on ajoute ?</h2></div>
+        <button class="icon-button" type="button" data-dialog-close aria-label="Fermer"><i class="ph ph-x"></i></button>
+      </header>
+      <div class="action-grid">
+        <button class="action-choice" type="button" data-action="expense">
+          <span class="action-icon action-icon-yellow"><i class="ph ph-receipt"></i></span>
+          <span><strong>Dépense</strong><small>Montant, payeur, partage</small></span>
+          <i class="ph ph-caret-right"></i>
+        </button>
+        <button class="action-choice" type="button" data-action="purchase">
+          <span class="action-icon action-icon-blue"><i class="ph ph-shopping-bag-open"></i></span>
+          <span><strong>À acheter</strong><small>Course ou achat à décider</small></span>
+          <i class="ph ph-caret-right"></i>
+        </button>
+        <button class="action-choice" type="button" data-action="task">
+          <span class="action-icon action-icon-green"><i class="ph ph-check-circle"></i></span>
+          <span><strong>Tâche</strong><small>Simple ou à tour de rôle</small></span>
+          <i class="ph ph-caret-right"></i>
+        </button>
+      </div>
+    </dialog>
+
+    <dialog class="app-dialog form-dialog" id="form-dialog" aria-labelledby="form-dialog-title">
+      <div class="dialog-grabber" aria-hidden="true"></div>
+      <div id="form-dialog-content"></div>
+    </dialog>
+
+    <dialog class="app-dialog search-dialog" id="search-dialog" aria-labelledby="search-title">
+      <div class="dialog-grabber" aria-hidden="true"></div>
+      <header class="dialog-header search-header">
+        <label class="search-field" for="global-search">
+          <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+          <input id="global-search" type="search" autocomplete="off" placeholder="Dépense, achat, tâche, groupe…" />
+          <kbd>ESC</kbd>
+        </label>
+        <button class="icon-button" type="button" data-dialog-close aria-label="Fermer la recherche"><i class="ph ph-x"></i></button>
+        <h2 class="sr-only" id="search-title">Recherche globale</h2>
+      </header>
+      <div id="search-results" class="search-results"></div>
+    </dialog>
+
+    <dialog class="app-dialog settings-dialog" id="settings-dialog" aria-labelledby="settings-title">
+      <div class="dialog-grabber" aria-hidden="true"></div>
+      <header class="dialog-header">
+        <div><p>TRICOUNT BRAZIL</p><h2 id="settings-title">Réglages</h2></div>
+        <button class="icon-button" type="button" data-dialog-close aria-label="Fermer"><i class="ph ph-x"></i></button>
+      </header>
+      <div id="settings-content"></div>
+    </dialog>
+
+    <dialog class="app-dialog help-dialog" id="help-dialog" aria-labelledby="help-title">
+      <div class="dialog-grabber" aria-hidden="true"></div>
+      <header class="dialog-header">
+        <div><p>EN 60 SECONDES</p><h2 id="help-title">Comment ça marche</h2></div>
+        <button class="icon-button" type="button" data-dialog-close aria-label="Fermer"><i class="ph ph-x"></i></button>
+      </header>
+      <div class="help-list">
+        <article><span>01</span><div><h3>Les virements restent en euros</h3><p>Une dépense en reais garde son montant d’origine, mais sa valeur en euros est figée à l’ajout.</p></div></article>
+        <article><span>02</span><div><h3>Le taux est une référence datée</h3><p>Le dernier taux EUR/BRL de la Banque centrale du Brésil est proposé. Le débit bancaire réel peut le remplacer.</p></div></article>
+        <article><span>03</span><div><h3>Les invités restent dans leur groupe</h3><p>Crée une soirée depuis Comptes. Un invité ne rejoint jamais les comptes permanents de l’Appartement.</p></div></article>
+        <article><span>04</span><div><h3>Le code protège tout l’espace</h3><p>Il est vérifié avant d’afficher l’interface, puis mémorisé uniquement sur cet appareil.</p></div></article>
+      </div>
+    </dialog>
+
+    <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

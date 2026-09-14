@@ -12,7 +12,7 @@ import {
   normalizeState,
   suggestSettlements,
   threeWayMerge,
-} from "../docs/core.js";
+} from "../src/core.js";
 
 function expense(overrides = {}) {
   return {
@@ -212,4 +212,24 @@ test("offline merge combines distinct edits and surfaces same-line conflicts", (
   const conflict = threeWayMerge(common, mine, theirs);
   assert.equal(conflict.conflicts.length, 1);
   assert.equal(conflict.conflicts[0].key, "expenses");
+});
+
+test("normalization repairs missing residents without discarding guests or groups", () => {
+  const state = createInitialState();
+  state.members = [{ id: "ana", name: "Ana", type: "guest" }];
+  state.spaces = [{ id: "dinner", name: "Dîner", memberIds: ["ana", "gaspard"] }];
+  const repaired = normalizeState(state);
+  assert.deepEqual(repaired.members.map(({ id }) => id), ["ana", "gaspard", "raphael"]);
+  assert.deepEqual(repaired.spaces.map(({ id }) => id), ["apartment", "dinner"]);
+});
+
+test("percentage allocations never create negative or missing cents", () => {
+  const ids = Array.from({ length: 10 }, (_, index) => `guest-${index}`);
+  const values = Object.fromEntries(ids.map((id) => [id, 10]));
+  const shares = calculateShares({ amountEur: 0.05, participantIds: ids, mode: "percent", values });
+  assert.equal(shares.reduce((sum, share) => sum + Math.round(share.amountEur * 100), 0), 5);
+  assert.ok(shares.every((share) => share.amountEur >= 0));
+  assert.equal(shares.filter((share) => share.amountEur === 0.01).length, 5);
+  const equal = calculateShares({ amountEur: 0.29, participantIds: ["gaspard"] });
+  assert.equal(equal[0].amountEur, 0.29);
 });
