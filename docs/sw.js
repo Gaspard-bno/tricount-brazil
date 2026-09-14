@@ -1,6 +1,6 @@
 /* Replaced by finalize-build.mjs with the exact fingerprint and built assets. */
-const BUILD_VERSION = "214f3a66da5fd64c";
-const PRECACHE_FILES = ["index.html","assets/index-wqhBGBWP.js","assets/index-wv60au01.css","manifest.webmanifest","icon-192.png"];
+const BUILD_VERSION = "af735e760c64941a";
+const PRECACHE_FILES = ["index.html","assets/index-C7p1IyYi.js","assets/index-wv60au01.css","manifest.webmanifest","icon-192.png"];
 const CACHE_PREFIX = "tricount-brazil-shell-";
 const CACHE_NAME = `${CACHE_PREFIX}${BUILD_VERSION}`;
 const SCOPE_URL = new URL(self.registration.scope);

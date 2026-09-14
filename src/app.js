@@ -636,7 +636,7 @@ function expenseOriginal(expense) {
 function expenseRow(expense) {
   const payer = memberById(expense.payerId);
   const [icon, tone] = categoryIcon(expense.category);
-  const attachments = [expense.note ? '<i class="ph ph-note" aria-label="Note jointe"></i>' : "", isSafeReceipt(expense.receiptDataUrl) ? '<i class="ph ph-camera" aria-label="Photo jointe"></i>' : ""].join("");
+  const attachments = [expense.note ? '<i class="ph ph-note" role="img" aria-label="Note jointe"></i>' : "", isSafeReceipt(expense.receiptDataUrl) ? '<i class="ph ph-camera" role="img" aria-label="Photo jointe"></i>' : ""].join("");
   return `
     <li class="data-row expense-ledger-row">
       <button class="row-open" type="button" data-expense-id="${esc(expense.id)}" aria-label="Ouvrir ${esc(expense.title)}">
@@ -763,7 +763,7 @@ function renderAccounts() {
     <div class="accounts-main">
       <section class="balance-hero" aria-labelledby="balance-title">
         <div class="balance-topline"><span class="balance-context"><i class="ph ph-buildings"></i> Appartement</span><span class="balance-eyebrow">SOLDE ENTRE VOUS</span></div>
-        <div class="balance-content"><div><h2 class="balance-value ${balanceClass}" id="balance-title">${euro.format(Math.abs(gaspardBalance))}</h2><p class="balance-copy">${balanceCopy}</p></div>${mainSettlement ? `<div class="hero-route" aria-label="${esc(memberById(mainSettlement.fromId).name)} rembourse ${esc(memberById(mainSettlement.toId).name)}">${avatar(mainSettlement.fromId)}<span>${esc(memberById(mainSettlement.fromId).name)}</span><i class="ph ph-arrow-right"></i>${avatar(mainSettlement.toId)}<span>${esc(memberById(mainSettlement.toId).name)}</span></div>` : `<div class="hero-route is-settled"><i class="ph ph-check-circle"></i><span>Tout est réglé</span></div>`}</div>
+        <div class="balance-content"><div><h2 class="balance-value ${balanceClass}" id="balance-title">${euro.format(Math.abs(gaspardBalance))}</h2><p class="balance-copy">${balanceCopy}</p></div>${mainSettlement ? `<div class="hero-route" role="img" aria-label="${esc(memberById(mainSettlement.fromId).name)} rembourse ${esc(memberById(mainSettlement.toId).name)}">${avatar(mainSettlement.fromId)}<span>${esc(memberById(mainSettlement.fromId).name)}</span><i class="ph ph-arrow-right"></i>${avatar(mainSettlement.toId)}<span>${esc(memberById(mainSettlement.toId).name)}</span></div>` : `<div class="hero-route is-settled"><i class="ph ph-check-circle"></i><span>Tout est réglé</span></div>`}</div>
         <div class="metrics">
           <div class="metric"><span>TOTAL</span><b>${euro.format(result.totalEur)}</b></div>
           <div class="metric"><span>DÉPENSES</span><b>${result.expenseCount}</b></div>
@@ -879,7 +879,7 @@ function shoppingRow(item, checked = false) {
   const assignee = item.assigneeId ? memberById(item.assigneeId) : null;
   return `<li class="shopping-row ${checked ? "is-checked" : ""}">
     <button class="check-button" type="button" data-toggle-shopping="${esc(item.id)}" aria-label="${checked ? "Remettre" : "Cocher"} ${esc(item.label)}"><i class="ph ph-check"></i></button>
-    <span class="row-copy"><b>${esc(item.label)}${item.favorite ? ` <i class="ph ph-star" aria-label="Favori"></i>` : ""}</b><small>${esc(item.quantity || "Quantité libre")} · ${esc(item.store || item.category || "Courses")}</small></span>
+    <span class="row-copy"><b>${esc(item.label)}${item.favorite ? ` <i class="ph ph-star" role="img" aria-label="Favori"></i>` : ""}</b><small>${esc(item.quantity || "Quantité libre")} · ${esc(item.store || item.category || "Courses")}</small></span>
     <span class="row-actions">${assignee ? `<span class="assignment-chip">${avatar(assignee)} ${esc(assignee.name)}</span>` : ""}<button class="row-menu" type="button" data-menu="shopping" data-id="${esc(item.id)}" aria-label="Actions pour ${esc(item.label)}"><i class="ph ph-dots-three"></i></button></span>
   </li>`;
 }
