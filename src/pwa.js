@@ -33,9 +33,12 @@ export function registerPwa({ onUpdate = () => {} } = {}) {
         });
       }
       offerUpdate();
-      registration.addEventListener("updatefound", () => {
+      function watchInstalling() {
         registration.installing?.addEventListener("statechange", offerUpdate);
-      });
+      }
+      // updatefound may fire before register() resolves on an existing install.
+      watchInstalling();
+      registration.addEventListener("updatefound", watchInstalling);
       async function checkForUpdate() {
         if (document.visibilityState === "hidden" || !navigator.onLine || Date.now() - lastUpdateCheck < 60_000) return;
         lastUpdateCheck = Date.now();

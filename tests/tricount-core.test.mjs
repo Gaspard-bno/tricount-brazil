@@ -233,3 +233,25 @@ test("percentage allocations never create negative or missing cents", () => {
   const equal = calculateShares({ amountEur: 0.29, participantIds: ["gaspard"] });
   assert.equal(equal[0].amountEur, 0.29);
 });
+
+test("a solo travel group preserves its membership and has no artificial debt", () => {
+  for (const memberId of ["gaspard", "raphael"]) {
+    const state = createInitialState();
+    state.spaces.push({
+      id: "solo-travel", name: "Week-end", type: "group", kind: "travel",
+      status: "open", memberIds: [memberId],
+    });
+    state.expenses.push(expense({
+      id: "solo-hotel", spaceId: "solo-travel", payerId: memberId,
+      participantIds: [memberId], amountEur: 90, amountOriginal: 90,
+      currency: "EUR", shares: [{ memberId, amountEur: 90 }],
+    }));
+    const normalized = normalizeState(state);
+    assert.equal(normalized.spaces.find(({ id }) => id === "solo-travel").kind, "travel");
+    assert.deepEqual(normalized.spaces.find(({ id }) => id === "solo-travel").memberIds, [memberId]);
+    const result = calculateBalances(normalized, "solo-travel");
+    assert.deepEqual(result.balances, { [memberId]: 0 });
+    assert.equal(result.totalEur, 90);
+    assert.deepEqual(suggestSettlements(result.balances), []);
+  }
+});

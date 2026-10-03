@@ -184,6 +184,7 @@ let currentSpaceId = APARTMENT_ID;
 let listTab = "shopping";
 let groupTab = "expenses";
 let expenseFilter = "all";
+let expenseCategoryFilter = "all";
 let expenseExpanded = false;
 let isSaving = false;
 let syncPromise = null;
@@ -250,12 +251,14 @@ function toast(message, tone = "success", action = null) {
 
 function closeDialog(dialog) {
   if (dialog?.open) dialog.close();
+  dialog?.classList.remove("expense-sheet");
 }
 
 function showDialog(dialog) {
   $$('dialog[open]').forEach((open) => {
     if (open !== dialog) open.close();
   });
+  dialog.classList.toggle("expense-sheet", dialog === formDialog && Boolean(formContent.querySelector("#expense-form")));
   if (!dialog.open) dialog.showModal();
 }
 
@@ -618,6 +621,7 @@ async function getLatestRate({ force = false } = {}) {
 
 function categoryIcon(category = "Autre") {
   const normalized = category.toLowerCase();
+  if (/voyage|vol|séjour|excursion/.test(normalized)) return ["airplane-tilt", "voyage"];
   if (/course|épicerie/.test(normalized)) return ["basket", "courses"];
   if (/transport|uber|taxi/.test(normalized)) return ["car", "transport"];
   if (/restaurant/.test(normalized)) return ["fork-knife", "restaurant"];
@@ -657,6 +661,14 @@ function expenseRow(expense) {
     </li>`;
 }
 
+function groupRow(space) {
+  const calculation = calculateBalances(state, space.id);
+  const travel = space.kind === "travel";
+  const people = space.memberIds?.length || 0;
+  const singular = people === 1 ? "personne" : "personnes";
+  return `<li><button class="group-row row-button ${travel ? "is-travel" : ""}" type="button" data-group-id="${esc(space.id)}" aria-label="Ouvrir ${esc(space.name)}"><span class="row-identity"><span class="row-icon"><i class="ph ph-${travel ? "airplane-tilt" : "users-three"}"></i></span><span class="row-copy"><b>${esc(space.name)}</b><small>${displayFullDate(space.date)} · ${people} ${singular} · ${calculation.expenseCount} dépenses</small></span></span><span class="group-meta"><span class="group-status ${space.status === "closed" ? "is-closed" : "is-open"}">${space.status === "closed" ? "Clôturé" : "Ouvert"}</span><span class="row-amount"><b>${euro.format(calculation.totalEur)}</b></span><i class="ph ph-caret-right"></i></span></button></li>`;
+}
+
 function emptyState(icon, title, copy, actionLabel = "", action = "") {
   return `<div class="empty-state"><div><i class="ph ph-${icon}" aria-hidden="true"></i><h3>${esc(title)}</h3><p>${esc(copy)}</p>${actionLabel ? `<button class="secondary-button" type="button" data-action="${esc(action)}">${esc(actionLabel)}</button>` : ""}</div></div>`;
 }
@@ -665,7 +677,8 @@ function filteredSpaceExpenses(spaceId = currentSpaceId) {
   const expenses = state.expenses
     .filter((expense) => expense.spaceId === spaceId && !expense.deletedAt)
     .sort((a, b) => String(b.date || b.createdAt).localeCompare(String(a.date || a.createdAt)));
-  return filterExpensesByPeriod(expenses, expenseFilter, new Date());
+  return filterExpensesByPeriod(expenses, expenseFilter, new Date())
+    .filter((expense) => expenseCategoryFilter === "all" || expense.category === expenseCategoryFilter);
 }
 
 function expenseFilters() {
@@ -682,6 +695,18 @@ function expenseFilters() {
     ["month-12", "Décembre"],
   ];
   return `<label class="period-filter"><i class="ph ph-calendar-blank" aria-hidden="true"></i><span class="sr-only">Période des dépenses</span><select data-expense-filter-select aria-label="Période des dépenses">${options.map(([value, label]) => `<option value="${value}" ${expenseFilter === value ? "selected" : ""}>${label}</option>`).join("")}</select><i class="ph ph-caret-down" aria-hidden="true"></i></label>`;
+}
+
+function expenseCategoryFilters(spaceId = currentSpaceId) {
+  const categories = new Set(state.expenses
+    .filter((expense) => expense.spaceId === spaceId && !expense.deletedAt)
+    .map((expense) => expense.category || "Autre"));
+  categories.add("Voyage");
+  const options = ["all", ...[...categories].sort((left, right) => left.localeCompare(right, "fr"))];
+  return `<div class="expense-category-filters" aria-label="Filtrer les dépenses par catégorie">${options.map((category) => {
+    const active = expenseCategoryFilter === category;
+    return `<button class="category-filter ${active ? "is-active" : ""}" type="button" data-expense-category-filter="${esc(category)}" aria-pressed="${active}">${category === "all" ? "Toutes" : esc(category)}</button>`;
+  }).join("")}</div>`;
 }
 
 function peopleBalanceList(spaceId) {
@@ -756,6 +781,8 @@ function renderAccounts() {
   const shown = expenseExpanded ? expenses : expenses.slice(0, 6);
   const groups = state.spaces.filter((space) => space.type === "group" && !space.archivedAt)
     .sort((a, b) => String(b.date || b.createdAt).localeCompare(String(a.date || a.createdAt)));
+  const travelGroups = groups.filter((space) => space.kind === "travel");
+  const eventGroups = groups.filter((space) => space.kind !== "travel");
   const due = recurringDue();
   const mainSettlement = suggestSettlements(result.balances)[0];
 
@@ -775,16 +802,19 @@ function renderAccounts() {
 
       <section class="section-block">
         <div class="section-head ledger-heading"><div><h2>Dépenses</h2><p>BRL d’origine, équivalent EUR figé.</p></div><div class="section-tools">${expenseFilters()}<button class="ledger-add-button" type="button" data-action="expense"><i class="ph ph-plus"></i><span>Dépense</span></button></div></div>
-        ${shown.length ? `<div class="expense-table-header"><span>Date</span><span>Dépense</span><span>Payé par</span><span>Montant BRL</span><span>EUR figé</span><span></span></div><ul class="data-list expense-ledger">${shown.map(expenseRow).join("")}</ul>` : emptyState("receipt", "Aucune dépense ici", "Ajoute le premier achat en reais ou en euros.", "Ajouter une dépense", "expense")}
+        ${expenseCategoryFilters(APARTMENT_ID)}
+        ${shown.length ? `<div class="expense-table-header"><span>Date</span><span>Dépense</span><span>Payé par</span><span>Montant BRL</span><span>EUR figé</span><span></span></div><ul class="data-list expense-ledger">${shown.map(expenseRow).join("")}</ul>` : emptyState("receipt", expenseCategoryFilter === "Voyage" ? "Aucune dépense de voyage" : "Aucune dépense ici", expenseCategoryFilter === "Voyage" ? "Ajoute un billet, un séjour ou une excursion dans un compte Voyage." : "Ajoute le premier achat en reais ou en euros.", "Ajouter une dépense", "expense")}
         ${expenses.length > 6 ? `<button class="load-more" type="button" data-toggle-expenses>${expenseExpanded ? "Réduire l’historique" : `Voir les ${expenses.length} dépenses`}</button>` : ""}
       </section>
 
       <section class="section-block">
-        <div class="section-head"><div><h2>Groupes ponctuels</h2><p>Soirées et invités, séparés de l’Appartement.</p></div><button class="text-button" type="button" data-new-group>+ Nouveau groupe</button></div>
-        ${groups.length ? `<ul class="group-list">${groups.map((space) => {
-          const calculation = calculateBalances(state, space.id);
-          return `<li><button class="group-row row-button" type="button" data-group-id="${esc(space.id)}" aria-label="Ouvrir le groupe ${esc(space.name)}"><span class="row-identity"><span class="row-icon"><i class="ph ph-users-three"></i></span><span class="row-copy"><b>${esc(space.name)}</b><small>${displayFullDate(space.date)} · ${space.memberIds?.length || 0} personnes · ${calculation.expenseCount} dépenses</small></span></span><span class="group-meta"><span class="group-status ${space.status === "closed" ? "is-closed" : "is-open"}">${space.status === "closed" ? "Clôturé" : "Ouvert"}</span><span class="row-amount"><b>${euro.format(calculation.totalEur)}</b></span><i class="ph ph-caret-right"></i></span></button></li>`;
-        }).join("")}</ul>` : emptyState("users-three", "Aucun groupe ponctuel", "Crée une soirée quand des invités partagent des dépenses avec vous.", "Créer un groupe", "new-group")}
+        <div class="section-head"><div><h2>Voyages</h2><p>Billets, séjours, excursions et dépenses d’un voyage séparées de l’Appartement.</p></div><button class="text-button" type="button" data-new-travel>+ Nouveau voyage</button></div>
+        ${travelGroups.length ? `<ul class="group-list">${travelGroups.map(groupRow).join("")}</ul>` : emptyState("airplane-tilt", "Aucun voyage séparé", "Crée un compte pour les billets, les baleines ou un prochain séjour. Tu peux être seul dans ce compte.", "Créer un voyage", "new-travel")}
+      </section>
+
+      <section class="section-block">
+        <div class="section-head"><div><h2>Comptes ponctuels</h2><p>Soirées, invités ou dépenses qui doivent rester à part.</p></div><button class="text-button" type="button" data-new-group>+ Nouveau compte</button></div>
+        ${eventGroups.length ? `<ul class="group-list">${eventGroups.map(groupRow).join("")}</ul>` : emptyState("users-three", "Aucun compte ponctuel", "Crée une soirée ou un compte personnel quand les dépenses ne concernent pas l’Appartement.", "Créer un compte", "new-group")}
       </section>
     </div>
 
@@ -819,6 +849,7 @@ function renderGroupDetail() {
   const shown = expenseExpanded ? expenses : expenses.slice(0, 8);
   const suggestions = suggestSettlements(result.balances);
   const members = spaceMembers(space.id);
+  const spaceLabel = space.kind === "travel" ? "voyage" : "compte";
   root.innerHTML = `<div class="group-detail-layout">
     <div>
       <button class="back-button" type="button" data-back-apartment><i class="ph ph-arrow-left"></i> Retour à l’Appartement</button>
@@ -831,8 +862,8 @@ function renderGroupDetail() {
       </section>
       <div class="subnav-tabs"><button class="${groupTab === "expenses" ? "is-active" : ""}" type="button" data-group-tab="expenses">Dépenses</button><button class="${groupTab === "settlements" ? "is-active" : ""}" type="button" data-group-tab="settlements">Règlements</button><button class="${groupTab === "activity" ? "is-active" : ""}" type="button" data-group-tab="activity">Activité</button></div>
       ${groupTab === "expenses" ? `
-        <div class="section-head"><div><h2>Dépenses du groupe</h2><p>Sous-groupes et deux devises acceptés.</p></div>${space.status !== "closed" ? `<button class="text-button" type="button" data-action="expense">+ Dépense</button>` : ""}</div>
-        ${expenseFilters()}
+        <div class="section-head"><div><h2>Dépenses du ${spaceLabel}</h2><p>Deux devises, une valeur EUR de règlement.</p></div>${space.status !== "closed" ? `<button class="text-button" type="button" data-action="expense">+ Dépense</button>` : ""}</div>
+        ${expenseFilters()}${expenseCategoryFilters(space.id)}
         ${shown.length ? `<ul class="data-list">${shown.map(expenseRow).join("")}</ul>` : emptyState("receipt", "Aucune dépense", "Ajoute le premier achat partagé de ce groupe.", "Ajouter une dépense", "expense")}
         ${expenses.length > 8 ? `<button class="load-more" type="button" data-toggle-expenses>${expenseExpanded ? "Réduire" : `Voir les ${expenses.length} dépenses`}</button>` : ""}
       ` : groupTab === "settlements" ? `
@@ -841,7 +872,7 @@ function renderGroupDetail() {
       ` : activityHistory(space.id)}
     </div>
     <aside class="accounts-rail">
-      <section class="rail-panel"><div class="section-head"><div><h2>Participants</h2><p>${members.length} personnes</p></div>${space.status !== "closed" ? `<button class="text-button" type="button" data-add-guest>+ Invité</button>` : ""}</div><ul class="people-list">${peopleBalanceList(space.id)}</ul></section>
+      <section class="rail-panel"><div class="section-head"><div><h2>Participants</h2><p>${members.length} personne${members.length > 1 ? "s" : ""}</p></div>${space.status !== "closed" ? `<button class="text-button" type="button" data-add-guest>+ Invité</button>` : ""}</div><ul class="people-list">${peopleBalanceList(space.id)}</ul></section>
       <section class="rail-panel"><div class="section-head"><div><h2>Prochain règlement</h2><p>En euros uniquement.</p></div></div>${primarySettlement(space.id)}</section>
       <section class="rail-panel"><div class="stack"><button class="secondary-button" type="button" data-copy-group-summary><i class="ph ph-copy"></i> Copier le résumé invité</button>${space.status === "closed" ? `<button class="quiet-button" type="button" data-reopen-group>Rouvrir le groupe</button>` : `<button class="primary-button" type="button" data-close-group>Vérifier et clôturer</button>`}</div></section>
     </aside>
@@ -974,7 +1005,8 @@ function renderTasks() {
     <section class="week-card"><div><h3>Cette semaine</h3><p>${soon.length} tâche${soon.length > 1 ? "s" : ""} dans les trois prochains jours, ${activeShoppingItems().length} article${activeShoppingItems().length > 1 ? "s" : ""} à acheter.</p></div><div class="week-stats"><div><b>${soon.length}</b><small>À suivre</small></div><div><b>${euro.format(Math.abs(balance.balances.gaspard || 0))}</b><small>Solde</small></div></div></section>
     <section><div class="section-head"><div><h2>À tour de rôle</h2><p>Une validation donne automatiquement la prochaine occurrence à l’autre.</p></div></div><div class="rotation-grid">${rotating.map((task) => {
       const person = memberById(task.assigneeId);
-      return `<article class="rotation-card"><i class="ph ph-${rotationIcon(task.id)}"></i><h3>${esc(task.title)}</h3><div class="rotation-assignee">${avatar(person)} <span>Au tour de <b>${esc(person.name)}</b></span></div><button class="secondary-button" type="button" data-complete-rotation="${esc(task.id)}"><i class="ph ph-check"></i> Fait par ${esc(person.name)}</button></article>`;
+      const nextPerson = memberById(person.id === "gaspard" ? "raphael" : "gaspard");
+      return `<article class="rotation-card"><i class="ph ph-${rotationIcon(task.id)}"></i><h3>${esc(task.title)}</h3><div class="rotation-assignee">${avatar(person)} <span>Au tour de <b>${esc(person.name)}</b></span></div><button class="secondary-button" type="button" data-complete-rotation="${esc(task.id)}" aria-label="Terminer ${esc(task.title)}, fait par ${esc(person.name)}"><i class="ph ph-check"></i><span>Fait</span></button><p class="routine-next">Ensuite : ${esc(nextPerson.name)}</p></article>`;
     }).join("")}</div></section>
     <section><div class="section-head"><div><h2>Tâches simples</h2><p>Responsable et échéance restent facultatifs.</p></div><button class="text-button" type="button" data-action="task">+ Ajouter</button></div>${simple.length ? `<ul class="task-list">${simple.map(taskRow).join("")}</ul>` : emptyState("check-circle", "Aucune tâche en attente", "Ajoute seulement ce qui évite un vrai oubli.", "Ajouter une tâche", "task")}${completed.length ? `<details class="history-details"><summary>Terminées · ${completed.length}<i class="ph ph-caret-down"></i></summary><ul class="task-list">${completed.slice(0, 20).map(taskRow).join("")}</ul></details>` : ""}</section>
     <section><details class="history-details"><summary>Historique des tours<i class="ph ph-caret-down"></i></summary>${activityHistory(APARTMENT_ID)}</details></section>
@@ -1076,7 +1108,7 @@ async function openExpenseForm({ expenseId = "", duplicateId = "", spaceId = cur
       ? roundMoney((Number(share.amountEur) / Number(data.amountEur)) * 100)
       : share.amountEur,
   ]));
-  const rate = currency === "BRL" ? await getLatestRate() : null;
+  let rate = currency === "BRL" ? currentRate : null;
   const title = editing ? "Modifier la dépense" : duplicate ? "Dupliquer la dépense" : "Nouvelle dépense";
 
   const captureFormDraft = () => {
@@ -1104,26 +1136,26 @@ async function openExpenseForm({ expenseId = "", duplicateId = "", spaceId = cur
           <div class="expense-form-intro"><span class="form-step">01</span><div><b>Informations essentielles</b><p>Date et catégorie restent visibles dès le départ.</p></div></div>
           <div class="field-grid essential-fields">
             <label class="field"><span class="field-label">Date</span><input id="expense-date" type="date" value="${esc(formDraft.date || todayIso())}" required /></label>
-            <label class="field"><span class="field-label">Catégorie</span><select id="expense-category" required>${["Courses", "Transport", "Restaurant", "Sortie", "Appartement", "Abonnement", "Autre"].map((category) => `<option ${category === (formDraft.category || "Courses") ? "selected" : ""}>${category}</option>`).join("")}</select></label>
+            <label class="field"><span class="field-label">Catégorie</span><select id="expense-category" required>${["Courses", "Transport", "Restaurant", "Sortie", "Voyage", "Appartement", "Abonnement", "Autre"].map((category) => `<option ${category === (formDraft.category || "Courses") ? "selected" : ""}>${category}</option>`).join("")}</select></label>
             <label class="field wide"><span class="field-label">Dépense</span><input id="expense-title" maxlength="90" value="${esc(formDraft.title || "")}" placeholder="Ex. Courses Condor" required /></label>
             <label class="field wide"><span class="field-label">Montant et devise</span><span class="money-field"><input id="expense-amount" type="number" inputmode="decimal" min="0.01" step="0.01" value="${esc(formDraft.amountOriginal || "")}" placeholder="0,00" required autofocus /><span class="currency-toggle"><button type="button" data-currency="BRL" class="${currency === "BRL" ? "is-active" : ""}">R$</button><button type="button" data-currency="EUR" class="${currency === "EUR" ? "is-active" : ""}">€</button></span></span></label>
           </div>
           <div class="suggestion-row" style="margin-top:10px">${(state.preferences.recentExpenseLabels || []).slice(0, 5).map((label) => `<button class="suggestion-chip" type="button" data-expense-label="${esc(label)}">${esc(label)}</button>`).join("")}</div>
-          <section id="currency-panel" class="form-section">
+          <details id="currency-panel" class="form-section expense-rate" ${currency === "BRL" && !rate ? "open" : ""}>
+            <summary><span>Taux et valeur de règlement</span><small>${currency === "BRL" && rate ? `1 € = ${compactNumber.format(rate.rate)} R$` : currency === "BRL" ? "À renseigner" : "En euros"}</small><i class="ph ph-caret-down" aria-hidden="true"></i></summary>
             ${currency === "BRL" ? `<div class="rate-card ${rate ? "" : "is-error"}" id="rate-card"><div><b>${rate ? `1 € = ${compactNumber.format(rate.rate)} R$` : "Taux automatique indisponible"}</b><small>${rate ? `${displayFullDate(rate.date)} · ${esc(rate.source)}` : "Entre un taux manuel ou attends le retour du réseau."}</small></div><i class="ph ${rate ? "ph-check-circle" : "ph-warning-circle"}"></i></div>
               <div class="field-grid" style="margin-top:12px"><label class="field"><span class="field-label">Taux EUR/BRL</span><input id="expense-rate" type="number" min="0.0001" step="0.0001" value="${esc(formDraft.exchangeRate || rate?.rate || "")}" placeholder="Ex. 6,0315" required /></label><label class="field"><span class="field-label">Débit bancaire en € (facultatif)</span><input id="expense-bank-eur" type="number" min="0.01" step="0.01" value="${esc(formDraft.manualAmountEur || "")}" placeholder="Valeur exacte du relevé" /></label></div>` : `<div class="rate-card"><div><b>Montant déjà en euros</b><small>Taux 1 · aucun appel de conversion.</small></div><i class="ph ph-check-circle"></i></div>`}
-          </section>
+          </details>
 
-          <section class="form-section"><div class="expense-form-intro compact"><span class="form-step">02</span><div><b>Qui paie et qui partage ?</b><p>Les deux résidents sont sélectionnés par défaut.</p></div></div><p class="form-section-title">PAYEUR</p><div class="participant-grid">${people.map((person) => `<button class="participant-toggle ${person.id === payerId ? "is-active" : ""}" type="button" data-payer="${esc(person.id)}">${avatar(person)}<span>${esc(person.name)}</span></button>`).join("")}</div></section>
-          <section class="form-section"><div class="sheet-title-row"><p class="form-section-title">PARTAGÉ AVEC</p><button class="text-button" type="button" id="select-everyone">Tout le monde</button></div><div class="participant-grid" id="expense-participants">${people.map((person) => `<button class="participant-toggle ${participantIds.includes(person.id) ? "is-active" : ""}" type="button" data-participant="${esc(person.id)}">${avatar(person)}<span>${esc(person.name)}</span></button>`).join("")}</div><label class="field" style="margin-top:12px"><span class="field-label">Répartition</span><select id="split-mode"><option value="equal" ${splitMode === "equal" ? "selected" : ""}>À parts égales</option><option value="exact" ${splitMode === "exact" ? "selected" : ""}>Montants exacts en €</option><option value="percent" ${splitMode === "percent" ? "selected" : ""}>Pourcentages</option></select></label><div id="split-values-root">${splitValuesMarkup(splitMode, participantIds, splitValueState)}</div></section>
+          <details class="form-section expense-sharing"><summary class="sharing-summary"><span>Payé et partagé</span><b>${esc(memberById(payerId).name)} · ${participantIds.length === 1 ? "personnel" : splitMode === "equal" ? `à ${participantIds.length} parts égales` : "répartition personnalisée"}</b><i class="ph ph-caret-down" aria-hidden="true"></i></summary><div class="expense-sharing-body"><p class="form-section-title">PAYÉ PAR</p><div class="participant-grid">${people.map((person) => `<button class="participant-toggle ${person.id === payerId ? "is-active" : ""}" type="button" data-payer="${esc(person.id)}">${avatar(person)}<span>${esc(person.name)}</span></button>`).join("")}</div><div class="sheet-title-row"><p class="form-section-title">PARTAGÉ AVEC</p><button class="text-button" type="button" id="select-everyone">Tout le monde</button></div><div class="participant-grid" id="expense-participants">${people.map((person) => `<button class="participant-toggle ${participantIds.includes(person.id) ? "is-active" : ""}" type="button" data-participant="${esc(person.id)}">${avatar(person)}<span>${esc(person.name)}</span></button>`).join("")}</div><label class="field" style="margin-top:12px"><span class="field-label">Répartition</span><select id="split-mode"><option value="equal" ${splitMode === "equal" ? "selected" : ""}>À parts égales</option><option value="exact" ${splitMode === "exact" ? "selected" : ""}>Montants exacts en €</option><option value="percent" ${splitMode === "percent" ? "selected" : ""}>Pourcentages</option></select></label><div id="split-values-root">${splitValuesMarkup(splitMode, participantIds, splitValueState)}</div></div></details>
 
-          <section class="form-section optional-fields"><div class="expense-form-intro compact"><span class="form-step">03</span><div><b>Facultatif</b><p>Ajoute seulement ce qui sera utile plus tard.</p></div></div><div class="field-grid">
+          <details class="form-section optional-fields expense-extras"><summary><span>Note, photo et répétition</span><small>Facultatif</small><i class="ph ph-caret-down" aria-hidden="true"></i></summary><div class="expense-extras-body"><div class="field-grid">
             <label class="field wide"><span class="field-label">Note</span><textarea id="expense-note" maxlength="500" placeholder="Ex. partagé avec les invités de la soirée">${esc(formDraft.note || "")}</textarea></label>
             <div class="receipt-field wide"><span class="field-label">Photo du ticket</span><label class="receipt-input"><input id="expense-receipt" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" />${receiptDataUrl ? `<img class="receipt-preview" src="${receiptDataUrl}" alt="Aperçu du ticket" />` : `<span><i class="ph ph-camera"></i>Prendre ou choisir une photo</span>`}</label>${receiptDataUrl ? `<button class="quiet-button remove-receipt" type="button" data-remove-receipt><i class="ph ph-trash"></i> Retirer la photo</button>` : ""}</div>
-          </div><label class="toggle-row"><span><b>Dépense récurrente</b><small>Loyer, internet ou abonnement — chaque création reste confirmée.</small></span><span class="switch"><input id="expense-recurring" type="checkbox" ${formDraft.recurrence ? "checked" : ""}/><span></span></span></label></section>
+          </div><label class="toggle-row"><span><b>Dépense récurrente</b><small>Loyer, internet ou abonnement — chaque création reste confirmée.</small></span><span class="switch"><input id="expense-recurring" type="checkbox" ${formDraft.recurrence ? "checked" : ""}/><span></span></span></label></div></details>
           <p class="form-error" id="expense-error" hidden></p>
         </div>
-        <div class="form-actions"><button class="secondary-button" type="button" data-dialog-close>Annuler</button><button class="primary-button accent" type="submit">${editing ? "Enregistrer" : "Ajouter la dépense"}</button></div>
+        <div class="form-actions"><button class="secondary-button" type="button" data-dialog-close>Annuler</button><button class="primary-button accent" type="submit"><span>${editing ? "Enregistrer" : "Ajouter la dépense"}</span><small class="expense-submit-summary">Fonctionne aussi hors ligne</small></button></div>
       </form>`;
 
     showDialog(formDialog);
@@ -1133,6 +1165,14 @@ async function openExpenseForm({ expenseId = "", duplicateId = "", spaceId = cur
       formDraft.currency = currency;
       state.preferences.lastCurrency = currency;
       renderForm();
+      if (currency === "BRL") {
+        void getLatestRate().then((latest) => {
+          if (!latest || !formDialog.open || currency !== "BRL") return;
+          captureFormDraft();
+          rate = latest;
+          renderForm();
+        });
+      }
     }));
     $$('[data-payer]', formContent).forEach((button) => button.addEventListener("click", () => {
       payerId = button.dataset.payer;
@@ -1241,6 +1281,14 @@ async function openExpenseForm({ expenseId = "", duplicateId = "", spaceId = cur
     setTimeout(() => $("#expense-amount")?.focus(), 60);
   };
   renderForm();
+  if (currency === "BRL") {
+    void getLatestRate().then((latest) => {
+      if (!latest || !formDialog.open || currency !== "BRL") return;
+      captureFormDraft();
+      rate = latest;
+      renderForm();
+    });
+  }
 }
 
 async function compressReceipt(file) {
@@ -1347,12 +1395,30 @@ function openPersonDetail(personId, spaceId) {
   showDialog(formDialog);
 }
 
-async function openGroupForm() {
+async function openGroupForm({ kind = "event" } = {}) {
   if (!(await ensureEditAccess())) return;
   let guests = [];
+  let residentIds = [...RESIDENT_IDS];
+  const travel = kind === "travel";
   const redraw = () => {
-    formContent.innerHTML = `${formHeader("GROUPE PONCTUEL", "Nouvelle soirée")}<form id="group-form"><div class="sheet-body"><p class="sheet-intro">Le groupe reste séparé de l’Appartement et se clôture seulement quand vous le décidez.</p><div class="field-grid"><label class="field wide"><span class="field-label">Nom du groupe</span><input id="group-name" maxlength="80" placeholder="Ex. Dîner chez nous" required autofocus /></label><label class="field"><span class="field-label">Date</span><input id="group-date" type="date" value="${todayIso()}" required /></label><label class="field"><span class="field-label">Devise habituelle</span><select id="group-currency"><option value="BRL">Real brésilien (R$)</option><option value="EUR">Euro (€)</option></select></label></div><section class="form-section"><p class="form-section-title">PARTICIPANTS PERMANENTS</p><div class="participant-grid">${RESIDENT_IDS.map((id) => `<span class="participant-toggle is-active">${avatar(id)}<span>${esc(memberById(id).name)}</span></span>`).join("")}</div></section><section class="form-section"><p class="form-section-title">INVITÉS SANS COMPTE</p><div class="quick-add"><input id="guest-name" maxlength="40" placeholder="Prénom ou surnom" /><button class="secondary-button" type="button" id="add-guest-inline"><i class="ph ph-plus"></i></button></div><div class="chip-row" style="margin-top:10px">${guests.map((guest) => `<button class="choice-chip is-active" type="button" data-remove-guest="${esc(guest.id)}">${esc(guest.name)} ×</button>`).join("")}</div></section></div><div class="form-actions"><button class="secondary-button" type="button" data-dialog-close>Annuler</button><button class="primary-button accent" type="submit">Créer le groupe</button></div></form>`;
+    const title = travel ? "Nouveau voyage" : "Nouveau compte ponctuel";
+    const example = travel ? "Ex. Rio · Baleines · Billets" : "Ex. Dîner chez nous";
+    formContent.innerHTML = `${formHeader(travel ? "VOYAGE" : "COMPTE PONCTUEL", title)}<form id="group-form"><div class="sheet-body"><p class="sheet-intro">Ce compte reste séparé de l’Appartement. Sélectionne seulement les personnes réellement concernées.</p><div class="field-grid"><label class="field wide"><span class="field-label">Nom du compte</span><input id="group-name" maxlength="80" placeholder="${example}" required autofocus /></label><label class="field"><span class="field-label">Date</span><input id="group-date" type="date" value="${todayIso()}" required /></label><label class="field"><span class="field-label">Devise habituelle</span><select id="group-currency"><option value="BRL">Real brésilien (R$)</option><option value="EUR">Euro (€)</option></select></label></div><section class="form-section"><div class="sheet-title-row"><p class="form-section-title">PERSONNES CONCERNÉES</p><span class="form-hint">Au moins une</span></div><div class="participant-grid">${RESIDENT_IDS.map((id) => `<button class="participant-toggle ${residentIds.includes(id) ? "is-active" : ""}" type="button" data-group-resident="${id}" aria-pressed="${residentIds.includes(id)}">${avatar(id)}<span>${esc(memberById(id).name)}</span></button>`).join("")}</div></section><section class="form-section"><p class="form-section-title">INVITÉS SANS COMPTE</p><div class="quick-add"><input id="guest-name" maxlength="40" placeholder="Prénom ou surnom" /><button class="secondary-button" type="button" id="add-guest-inline" aria-label="Ajouter un invité"><i class="ph ph-plus"></i></button></div><div class="chip-row" style="margin-top:10px">${guests.map((guest) => `<button class="choice-chip is-active" type="button" data-remove-guest="${esc(guest.id)}">${esc(guest.name)} ×</button>`).join("")}</div></section><p class="form-error" id="group-error" hidden></p></div><div class="form-actions"><button class="secondary-button" type="button" data-dialog-close>Annuler</button><button class="primary-button accent" type="submit">Créer le compte</button></div></form>`;
     showDialog(formDialog);
+    $$('[data-group-resident]', formContent).forEach((button) => button.addEventListener("click", () => {
+      const id = button.dataset.groupResident;
+      if (residentIds.includes(id)) {
+        if (residentIds.length === 1) {
+          $("#group-error").textContent = "Choisis au moins une personne concernée.";
+          $("#group-error").hidden = false;
+          return;
+        }
+        residentIds = residentIds.filter((residentId) => residentId !== id);
+      } else {
+        residentIds = [...residentIds, id];
+      }
+      redraw();
+    }));
     $("#add-guest-inline").addEventListener("click", () => {
       const name = $("#guest-name").value.trim();
       if (!name) return;
@@ -1362,13 +1428,14 @@ async function openGroupForm() {
     $$('[data-remove-guest]', formContent).forEach((button) => button.addEventListener("click", () => { guests = guests.filter((guest) => guest.id !== button.dataset.removeGuest); redraw(); }));
     $("#group-form").addEventListener("submit", async (event) => {
       event.preventDefault();
-      const group = { id: entityId("group"), name: $("#group-name").value.trim(), type: "group", status: "open", currency: $("#group-currency").value, memberIds: [...RESIDENT_IDS, ...guests.map((guest) => guest.id)], date: $("#group-date").value, createdAt: isoNow(), updatedAt: isoNow() };
-      const saved = await mutate("gaspard", "Création d’un groupe", (draft) => {
+      if (!residentIds.length) return;
+      const group = { id: entityId("group"), name: $("#group-name").value.trim(), type: "group", kind, status: "open", currency: $("#group-currency").value, memberIds: [...residentIds, ...guests.map((guest) => guest.id)], date: $("#group-date").value, createdAt: isoNow(), updatedAt: isoNow() };
+      const saved = await mutate(residentIds[0], `Création d’un ${travel ? "voyage" : "compte"}`, (draft) => {
         draft.members.push(...guests);
         draft.spaces.push(group);
         addActivity("group-add", `${group.name} a été créé`, "space", group.id, null, "gaspard");
       });
-      if (saved) { closeDialog(formDialog); currentSpaceId = group.id; setView("accounts", { spaceId: group.id }); toast("Groupe créé."); }
+      if (saved) { closeDialog(formDialog); currentSpaceId = group.id; setView("accounts", { spaceId: group.id }); toast(travel ? "Voyage créé." : "Compte créé."); }
     });
   };
   redraw();
@@ -1740,9 +1807,11 @@ root.addEventListener("click", async (event) => {
   if (target.dataset.ideaId) return openIdeaDetail(target.dataset.ideaId);
   if (target.dataset.action === "expense") return openExpenseForm({ spaceId: currentSpaceId });
   if (target.dataset.action === "new-group" || target.hasAttribute("data-new-group")) return openGroupForm();
+  if (target.dataset.action === "new-travel" || target.hasAttribute("data-new-travel")) return openGroupForm({ kind: "travel" });
   if (target.dataset.action === "new-idea" || target.hasAttribute("data-new-idea")) return openIdeaForm();
   if (target.dataset.action === "task") return openTaskForm();
   if (target.dataset.expenseFilter) { expenseFilter = target.dataset.expenseFilter; expenseExpanded = false; render(); return; }
+  if (target.dataset.expenseCategoryFilter) { expenseCategoryFilter = target.dataset.expenseCategoryFilter; expenseExpanded = false; render(); return; }
   if (target.hasAttribute("data-toggle-expenses")) { expenseExpanded = !expenseExpanded; render(); return; }
   if (target.hasAttribute("data-back-apartment")) { currentSpaceId = APARTMENT_ID; setView("accounts"); return; }
   if (target.dataset.groupTab) { groupTab = target.dataset.groupTab; render(); return; }

@@ -196,7 +196,8 @@ export function calculateShares({ amountEur, participantIds, mode = "equal", val
       throw new Error("Les pourcentages doivent totaliser 100 %.");
     }
     const cents = Math.round(total * 100);
-    const raw = percentages.map((percentage) => cents * percentage / 100);
+    const percentageTotal = percentages.reduce((acc, value) => acc + value, 0);
+    const raw = percentages.map((percentage) => cents * percentage / percentageTotal);
     const allocated = raw.map(Math.floor);
     let remaining = cents - allocated.reduce((sum, amount) => sum + amount, 0);
     const order = raw.map((amount, index) => ({ index, remainder: amount - allocated[index] }))

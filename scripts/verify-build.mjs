@@ -23,19 +23,22 @@ assert.match(html, /href="\/tricount-brazil\/assets\/[^\"]+\.css"/);
 let totalBytes = 0;
 let transferBytes = 0;
 const resourceRows = [];
-const critical = ["index.html", ...[...html.matchAll(/(?:src|href)="\/tricount-brazil\/([^\"]+\.(?:js|css))"/g)].map((match) => match[1]), "icon-192.png"];
+const cssAssets = (await readdir(resolve(output, "assets"))).filter((file) => file.endsWith(".css"));
+const cssResources = [];
+for (const file of cssAssets) {
+  const css = await readFile(resolve(output, "assets", file), "utf8");
+  assert.doesNotMatch(css, /@font-face/, "No blocking icon/web font should ship");
+  assert.doesNotMatch(css, /brazil-mineral/, "No legacy texture should load from CSS");
+  assert.doesNotMatch(css, /url\(["']?https?:/, "CSS assets must not introduce a remote blocker");
+  cssResources.push(...[...css.matchAll(/url\(["']?\/tricount-brazil\/([^"')]+)["']?\)/g)].map((match) => match[1]));
+}
+const critical = ["index.html", ...[...html.matchAll(/(?:src|href)="\/tricount-brazil\/([^\"]+\.(?:js|css))"/g)].map((match) => match[1]), ...cssResources, "icon-192.png", "manifest.webmanifest"];
 for (const file of [...new Set(critical)]) {
   const contents = await readFile(resolve(output, file));
-  const transfer = /\.(html|js|css)$/.test(file) ? gzipSync(contents).length : contents.length;
+  const transfer = /\.(html|js|css|webmanifest)$/.test(file) ? gzipSync(contents).length : contents.length;
   totalBytes += contents.length;
   transferBytes += transfer;
   resourceRows.push({ file, bytes: contents.length, gzipBytes: transfer });
 }
 assert.ok(transferBytes < 300 * 1024, `Critical transfer ${transferBytes} bytes exceeds 300 KiB budget`);
-const cssAssets = (await readdir(resolve(output, "assets"))).filter((file) => file.endsWith(".css"));
-for (const file of cssAssets) {
-  const css = await readFile(resolve(output, "assets", file), "utf8");
-  assert.doesNotMatch(css, /@font-face/, "No blocking icon/web font should ship");
-  assert.doesNotMatch(css, /brazil-mineral/, "No legacy texture should load from CSS");
-}
 console.log(JSON.stringify({ version, precacheCount: precache.length, criticalBytes: totalBytes, criticalGzipBytes: transferBytes, resources: resourceRows }, null, 2));

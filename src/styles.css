@@ -306,7 +306,7 @@ summary:focus-visible {
   background: var(--surface);
   color: var(--muted-2);
   font-family: var(--font);
-  font-size: 9px;
+  font-size: 11px;
   box-shadow: 0 1px 0 var(--line);
 }
 
@@ -348,7 +348,7 @@ summary:focus-visible {
 }
 
 .avatar-blue {
-  background: linear-gradient(145deg, #87b8ef, #4777b8);
+  background: linear-gradient(145deg, #9cc8fa, #618ed0);
   color: #061b36;
 }
 
@@ -358,7 +358,8 @@ summary:focus-visible {
 }
 
 .avatar-guest {
-  background: linear-gradient(145deg, #a9b5ad, #4b5650 72%);
+  background: linear-gradient(145deg, #c4cec7, #93a399);
+  color: #15271c;
 }
 
 .sync-compact,
@@ -860,7 +861,7 @@ button:disabled {
   display: block;
   margin-top: 4px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -975,7 +976,7 @@ button:disabled {
 
 .person-balance small {
   color: var(--muted);
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .positive { color: var(--green) !important; }
@@ -1007,7 +1008,7 @@ button:disabled {
   width: 31px;
   height: 31px;
   border-color: transparent;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .settlement-route i {
@@ -1077,7 +1078,7 @@ button:disabled {
   border-radius: 99px;
   background: var(--surface-2);
   color: var(--muted);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 750;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -1279,7 +1280,7 @@ button:disabled {
 .shopping-group h3 {
   margin-bottom: 5px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -1324,7 +1325,7 @@ button:disabled {
   border-radius: 99px;
   background: var(--surface-2);
   color: var(--muted);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
 }
 
@@ -1333,7 +1334,7 @@ button:disabled {
   width: 21px;
   height: 21px;
   border: 0;
-  font-size: 8px;
+  font-size: 11px;
 }
 
 .shop-finish-banner,
@@ -1382,7 +1383,7 @@ button:disabled {
 
 .decision-price small {
   color: var(--muted);
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .idea-status.is-idea { color: var(--blue); background: var(--blue-soft); }
@@ -1455,7 +1456,7 @@ button:disabled {
   width: 27px;
   height: 27px;
   border-color: var(--surface);
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .rotation-card button {
@@ -1477,7 +1478,7 @@ button:disabled {
 
 .due-date {
   color: var(--muted);
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .due-date.is-overdue { color: var(--red); }
@@ -1507,7 +1508,7 @@ button:disabled {
 
 .week-stats small {
   color: var(--muted);
-  font-size: 9px;
+  font-size: 11px;
   text-transform: uppercase;
 }
 
@@ -1790,7 +1791,7 @@ button:disabled {
   width: 27px;
   height: 27px;
   border: 0;
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .split-values {
@@ -1858,7 +1859,7 @@ button:disabled {
 .toggle-row b,
 .toggle-row small { display: block; }
 .toggle-row b { font-size: 12px; }
-.toggle-row small { margin-top: 4px; color: var(--muted); font-size: 10px; }
+.toggle-row small { margin-top: 4px; color: var(--muted); font-size: 11px; }
 
 .switch {
   position: relative;
@@ -2000,7 +2001,7 @@ button:disabled {
 
 .search-kind {
   color: var(--muted-2);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 750;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -2032,7 +2033,7 @@ button:disabled {
 .settings-row > div b,
 .settings-row > div small { display: block; }
 .settings-row > div b { font-size: 12px; }
-.settings-row > div small { margin-top: 3px; color: var(--muted); font-size: 10px; }
+.settings-row > div small { margin-top: 3px; color: var(--muted); font-size: 11px; }
 
 .theme-control {
   display: grid;
@@ -2045,13 +2046,13 @@ button:disabled {
 }
 
 .theme-control button {
-  min-height: 34px;
+  min-height: 44px;
   padding: 0 10px;
   border-radius: 7px;
   background: transparent;
   color: var(--muted);
   cursor: pointer;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
 }
 
@@ -2086,7 +2087,7 @@ button:disabled {
   border-radius: 10px;
   background: var(--surface-2);
   color: var(--yellow);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 800;
 }
 
@@ -2184,7 +2185,7 @@ button:disabled {
 
 .activity-row time {
   color: var(--muted-2);
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .history-restore {
@@ -2195,7 +2196,7 @@ button:disabled {
   background: transparent;
   color: var(--muted);
   cursor: pointer;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
 }
 
@@ -2214,7 +2215,7 @@ button:disabled {
 
 .chart-row span,
 .chart-row b {
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .chart-row b {
@@ -2263,7 +2264,7 @@ button:disabled {
 }
 
 .conflict-card h3 { font-size: 12px; }
-.conflict-card p { margin-top: 5px; color: var(--muted); font-size: 10px; line-height: 1.4; }
+.conflict-card p { margin-top: 5px; color: var(--muted); font-size: 11px; line-height: 1.4; }
 .conflict-card .segmented-control { margin-top: 12px; }
 
 .receipt-thumb {
@@ -2292,7 +2293,7 @@ button:disabled {
   .mobile-brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
   .mobile-brand .brand-mark { flex-basis: 34px; width: 34px; height: 34px; border-radius: 11px; }
   .mobile-brand strong { overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
-  .mobile-brand small { font-size: 9px; }
+  .mobile-brand small { font-size: 11px; }
   .mobile-only { display: inline-grid; }
   .sync-pill { width: 40px; min-width: 40px; padding: 0; justify-content: center; }
   .sync-pill span:last-child { display: none; }
@@ -2308,7 +2309,7 @@ button:disabled {
   .metric { padding-right: 10px; }
   .metric + .metric { padding-left: 12px; }
   .metric b { font-size: 15px; }
-  .metric span { font-size: 10px; letter-spacing: 0.08em; }
+  .metric span { font-size: 11px; letter-spacing: 0.08em; }
   .bottom-nav {
     position: fixed;
     z-index: 50;
@@ -2413,7 +2414,7 @@ button:disabled {
   .metric b { font-size: 13px; }
   .participant-grid { grid-template-columns: 1fr; }
   .bottom-nav { padding-inline: 3px; }
-  .bottom-item span { font-size: 10px; }
+  .bottom-item span { font-size: 11px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2934,8 +2935,13 @@ body.access-locked {
   font-weight: 700;
 }
 
+.period-filter:focus-within {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
 .period-filter > i:last-child {
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .ledger-add-button {
@@ -2961,7 +2967,7 @@ body.access-locked {
   padding: 12px 10px;
   border-block: 1px solid var(--line);
   color: var(--muted-2);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 760;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -3005,7 +3011,7 @@ body.access-locked {
   height: 26px;
   flex-basis: 26px;
   border: 0;
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .ledger-original,
@@ -3115,7 +3121,7 @@ body.access-locked {
   border-radius: 10px;
   background: var(--yellow-soft);
   color: var(--yellow);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 800;
 }
 
@@ -3127,7 +3133,7 @@ body.access-locked {
 .expense-form-intro p {
   margin-top: 3px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .essential-fields {
@@ -3148,30 +3154,356 @@ body.access-locked {
   min-height: 44px;
   justify-self: start;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 11px;
 }
 
-@media (max-width: 1180px) {
+/* Daily workflows: compact essentials, generous touch areas. */
+.expense-category-filters {
+  display: flex;
+  gap: 6px;
+  max-width: 100%;
+  margin: 0 0 14px;
+  padding: 2px 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+.expense-category-filters::-webkit-scrollbar {
+  display: none;
+}
+
+.category-filter {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 0 13px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.category-filter.is-active {
+  border-color: var(--line-strong);
+  background: var(--surface-3);
+  color: var(--ink);
+}
+
+.group-row.is-travel .row-icon {
+  border-color: rgba(136, 178, 255, 0.2);
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
+.form-hint,
+.routine-next {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.routine-next {
+  margin-top: 9px;
+}
+
+.period-summary {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin: -2px 0 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.period-summary b {
+  color: var(--ink-soft);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+.list-tabs {
+  gap: 4px;
+  width: min(100%, 430px);
+  min-height: 54px;
+  margin: 0;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--surface);
+}
+
+.list-tabs button {
+  flex: 1;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 9px;
+}
+
+.list-tabs button.is-active {
+  background: var(--surface-3);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.list-tabs button.is-active::after {
+  content: none;
+}
+
+.list-tabs button span {
+  margin-left: 5px;
+  color: var(--muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.quick-add:focus-within {
+  border-color: var(--blue);
+}
+
+.quick-add input {
+  font-size: 16px;
+}
+
+.tasks-header,
+.week-card {
+  margin-bottom: 0;
+}
+
+.tasks-header p:last-child {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.rotation-card button {
+  border-color: rgba(101, 207, 155, 0.2);
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.expense-essentials {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.expense-essentials .wide,
+.expense-essentials .money-field,
+.expense-essentials .amount-field {
+  grid-column: 1 / -1;
+}
+
+.expense-rate,
+.expense-sharing,
+.expense-extras {
+  margin-top: 14px;
+  padding-top: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.expense-rate > summary,
+.expense-sharing > summary,
+.expense-extras > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 54px;
+  padding: 10px 12px;
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+
+.expense-rate > summary::-webkit-details-marker,
+.expense-sharing > summary::-webkit-details-marker,
+.expense-extras > summary::-webkit-details-marker {
+  display: none;
+}
+
+.expense-rate > summary > i,
+.expense-sharing > summary > i,
+.expense-extras > summary > i {
+  color: var(--muted);
+  transition: transform 180ms var(--ease-out);
+}
+
+.expense-rate[open] > summary > i,
+.expense-sharing[open] > summary > i,
+.expense-extras[open] > summary > i {
+  transform: rotate(180deg);
+}
+
+.expense-rate > :not(summary),
+.expense-sharing > :not(summary),
+.expense-extras > :not(summary) {
+  margin: 0 12px 14px;
+}
+
+.expense-sharing .form-section,
+.expense-extras .form-section {
+  margin-top: 12px;
+  padding-top: 14px;
+}
+
+.sharing-summary {
+  min-width: 0;
+}
+
+.expense-sharing > .sharing-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 10px;
+}
+
+.sharing-summary > span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.sharing-summary > b {
+  grid-column: 1;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sharing-summary > i {
+  grid-column: 2;
+  grid-row: 1 / 3;
+}
+
+.expense-rate > summary > small,
+.expense-extras > summary > small {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 500;
+  text-align: right;
+}
+
+.sharing-summary .avatar {
+  flex-basis: 25px;
+  width: 25px;
+  height: 25px;
+  border: 0;
+  font-size: 11px;
+}
+
+.expense-submit-summary {
+  flex: 0 1 auto;
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.primary-button.accent:has(.expense-submit-summary) {
+  flex-direction: column;
+  gap: 1px;
+  padding-block: 7px;
+}
+
+.primary-button.accent .expense-submit-summary {
+  color: #5a4815;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.expense-sheet .sheet-body {
+  padding: 18px 22px;
+}
+
+.expense-sheet .dialog-header {
+  min-height: 74px;
+  padding-block: 14px;
+}
+
+.expense-sheet .form-actions > .primary-button {
+  min-height: 48px;
+}
+
+.expense-sheet .form-actions > .secondary-button {
+  flex: 0 0 auto;
+  min-width: 72px;
+}
+
+.expense-sheet .expense-form-intro {
+  margin-bottom: 12px;
+}
+
+.field input[type="date"] {
+  min-width: 0;
+  appearance: none;
+}
+
+.field input[type="date"]::-webkit-date-and-time-value {
+  min-height: 1.4em;
+  text-align: left;
+}
+
+.choice-chip:has(input:focus-visible),
+.switch:has(input:focus-visible),
+.receipt-input:focus-within {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+}
+
+.sheet-body .expense-ledger-row .row-open {
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "identity eur" "date original";
+  gap: 4px 10px;
+}
+
+.sheet-body .expense-ledger-row .row-identity { grid-area: identity; }
+.sheet-body .expense-ledger-row .ledger-date { grid-area: date; margin-left: 50px; }
+.sheet-body .expense-ledger-row .ledger-original { grid-area: original; }
+.sheet-body .expense-ledger-row .ledger-eur { grid-area: eur; }
+.sheet-body .expense-ledger-row .ledger-payer,
+.sheet-body .expense-ledger-row .ledger-caret { display: none; }
+
+.view-enter {
+  animation: view-enter 180ms var(--ease-out);
+}
+
+@keyframes view-enter {
+  from { opacity: 0; transform: translateY(5px); }
+}
+
+@media (max-width: 1280px) and (min-width: 841px) {
   .accounts-layout {
-    grid-template-columns: minmax(0, 1fr) 286px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
   }
 
   .accounts-main {
-    padding-right: 22px;
+    padding-right: 0;
   }
 
   .accounts-rail {
-    padding-left: 22px;
+    position: static;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .accounts-rail .rail-panel {
+    padding-top: 0;
   }
 
   .expense-table-header,
   .expense-ledger-row .row-open {
-    grid-template-columns: 78px minmax(150px, 2fr) 102px 102px 104px 16px;
+    grid-template-columns: 60px minmax(110px, 2fr) 90px 88px 90px 16px;
     gap: 10px;
-  }
-
-  .ledger-payer span {
-    display: none;
   }
 }
 
@@ -3201,13 +3533,9 @@ body.access-locked {
     min-height: 260px;
   }
 
-  .access-visual img {
-    height: 260px;
-  }
-
   .topbar {
     min-height: 68px;
-    padding: 9px 14px;
+    padding: max(9px, env(safe-area-inset-top)) 14px 9px;
   }
 
   .mobile-brand .brand-mark {
@@ -3218,15 +3546,15 @@ body.access-locked {
 
   .topbar-actions .icon-button,
   .sync-pill {
-    width: 38px;
-    height: 38px;
-    min-height: 38px;
-    flex-basis: 38px;
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    flex-basis: 44px;
     border-radius: 10px;
   }
 
   .view-root {
-    padding: 18px 14px 116px;
+    padding: 16px 16px calc(96px + env(safe-area-inset-bottom));
   }
 
   .accounts-layout,
@@ -3236,7 +3564,7 @@ body.access-locked {
   }
 
   .accounts-main {
-    gap: 24px;
+    gap: 22px;
     padding: 0;
   }
 
@@ -3246,8 +3574,8 @@ body.access-locked {
   }
 
   .balance-hero {
-    min-height: 270px;
-    padding: 20px 18px 0;
+    min-height: 0;
+    padding: 18px 18px 0;
     border-radius: 16px;
   }
 
@@ -3256,9 +3584,14 @@ body.access-locked {
     gap: 15px;
   }
 
-  .balance-value {
-    margin-top: 18px;
-    font-size: clamp(46px, 14vw, 66px);
+  .balance-hero .balance-value {
+    margin-top: 16px;
+    font-size: clamp(40px, 12.8vw, 54px);
+  }
+
+  .balance-hero .balance-copy {
+    margin-top: 9px;
+    font-size: 13px;
   }
 
   .hero-route {
@@ -3291,8 +3624,8 @@ body.access-locked {
   }
 
   .metrics {
-    margin-top: 32px;
-    padding-bottom: 16px;
+    margin-top: 20px;
+    padding-bottom: 14px;
   }
 
   .ledger-heading {
@@ -3321,7 +3654,7 @@ body.access-locked {
   }
 
   .expense-ledger-row {
-    min-height: 78px;
+    min-height: 76px;
     padding-left: 0;
   }
 
@@ -3330,8 +3663,8 @@ body.access-locked {
     grid-template-areas:
       "identity eur"
       "date original";
-    gap: 5px 12px;
-    min-height: 77px;
+    gap: 3px 10px;
+    min-height: 75px;
     padding-block: 10px;
   }
 
@@ -3342,8 +3675,8 @@ body.access-locked {
   .ledger-date {
     grid-area: date;
     margin-left: 47px;
-    color: var(--muted-2);
-    font-size: 9px;
+    color: var(--muted);
+    font-size: 11px;
   }
 
   .ledger-date span {
@@ -3365,7 +3698,7 @@ body.access-locked {
 
   .ledger-original b {
     color: var(--muted);
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .ledger-eur {
@@ -3373,7 +3706,8 @@ body.access-locked {
   }
 
   .ledger-eur b {
-    font-size: 13px;
+    font-size: 15px;
+    letter-spacing: -0.025em;
   }
 
   .mobile-expense-payer {
@@ -3386,17 +3720,19 @@ body.access-locked {
 
   .bottom-nav {
     grid-template-columns: repeat(4, 1fr);
-    min-height: calc(66px + env(safe-area-inset-bottom));
-    padding-inline: 10px;
+    min-height: calc(70px + env(safe-area-inset-bottom));
+    padding: 8px 10px max(8px, env(safe-area-inset-bottom));
+    gap: 6px;
   }
 
   .mobile-fab {
-    right: calc(12.5% - 26px);
-    bottom: calc(7px + env(safe-area-inset-bottom));
+    right: calc(12.5% - 25px);
+    bottom: max(9px, env(safe-area-inset-bottom));
     left: auto;
-    width: 52px;
-    height: 52px;
-    border-width: 3px;
+    width: 50px;
+    height: 50px;
+    border-width: 0;
+    border-radius: 15px;
     transform: none;
   }
 
@@ -3411,29 +3747,52 @@ body.access-locked {
   .rotation-card {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
-    gap: 4px 12px;
+    gap: 5px 10px;
     min-height: 0;
     padding: 14px;
     align-items: center;
   }
 
   .rotation-card > i {
-    grid-row: 1 / 3;
+    grid-column: 1;
+    grid-row: 1 / 4;
+    color: var(--green);
   }
 
   .rotation-card h3 {
+    grid-column: 2;
     margin: 0;
   }
 
   .rotation-assignee {
+    grid-column: 2;
     margin: 0;
+    font-size: 12px;
+    gap: 5px;
+  }
+
+  .rotation-assignee .avatar {
+    width: 22px;
+    height: 22px;
+    flex-basis: 22px;
+    border: 0;
   }
 
   .rotation-card button {
     grid-column: 3;
-    grid-row: 1 / 3;
+    grid-row: 1 / 4;
     width: auto;
     margin: 0;
+  }
+
+  .rotation-card .routine-next {
+    grid-column: 2;
+    margin-top: 0;
+    font-size: 11px;
+  }
+
+  .list-tabs {
+    width: 100%;
   }
 }
 
@@ -3469,12 +3828,20 @@ body.access-locked {
   }
 
   .access-visual {
-    min-height: 190px;
+    min-height: 140px;
     border-radius: 17px;
   }
 
-  .access-visual img {
-    height: 190px;
+  .access-art-mark {
+    width: 60px;
+    height: 60px;
+    margin-top: -20px;
+    border-radius: 17px;
+    font-size: 23px;
+  }
+
+  .access-visual::after {
+    width: 160px;
   }
 
   .mobile-brand strong {
@@ -3494,7 +3861,7 @@ body.access-locked {
   }
 
   .ledger-add-button {
-    width: 40px;
+    width: 44px;
     padding: 0;
     justify-content: center;
   }
@@ -3504,16 +3871,17 @@ body.access-locked {
   }
 
   .balance-eyebrow {
-    font-size: 8px;
+    font-size: 11px;
+    letter-spacing: 0.075em;
   }
 
-  .balance-copy {
+  .balance-hero .balance-copy {
     max-width: 270px;
     font-size: 12px;
   }
 
   .metric {
-    padding-top: 15px;
+    padding-top: 12px;
   }
 
   .metric b {
@@ -3525,10 +3893,10 @@ body.access-locked {
   }
 
   .rotation-card button {
-    width: 42px;
-    min-width: 42px;
-    padding: 0;
-    font-size: 0;
+    min-width: 60px;
+    padding: 0 10px;
+    font-size: 12px;
+    gap: 5px;
   }
 
   .rotation-card button i {
@@ -3537,11 +3905,73 @@ body.access-locked {
 
   .essential-fields,
   .optional-fields {
-    padding: 13px;
+    padding-inline: 0;
   }
 
   .expense-form-intro p {
     line-height: 1.4;
+  }
+
+  .expense-sheet .sheet-body {
+    padding: 14px 16px;
+  }
+
+  .expense-sheet .dialog-header {
+    min-height: 66px;
+    padding: 10px 16px;
+  }
+
+  .expense-sheet .dialog-header h2 {
+    font-size: 20px;
+  }
+
+  .expense-sheet .money-field input {
+    min-height: 64px;
+    font-size: 32px;
+  }
+
+  .expense-sheet .currency-toggle {
+    top: 6px;
+    bottom: 6px;
+  }
+
+  .expense-sheet .form-actions {
+    gap: 10px;
+    padding-top: 10px;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+  }
+
+  .expense-sheet .expense-form-intro:not(.compact) {
+    display: none;
+  }
+
+  .form-actions {
+    flex-wrap: wrap;
+  }
+
+  .form-actions > button {
+    min-width: 90px;
+    padding-inline: 12px;
+    font-size: 13px;
+  }
+
+  .shopping-row,
+  .task-row {
+    gap: 10px;
+  }
+
+  .shopping-row .assignment-chip,
+  .task-row .assignment-chip {
+    font-size: 0;
+    min-height: 28px;
+    padding: 3px;
+    gap: 0;
+    border: 0;
+    background: transparent;
+  }
+
+  .row-actions {
+    gap: 5px;
   }
 }
 
@@ -3555,7 +3985,7 @@ body.access-locked {
   }
 
   .mobile-brand strong {
-    max-width: 92px;
+    max-width: 108px;
   }
 
   .view-root {
@@ -3568,5 +3998,24 @@ body.access-locked {
 
   .bottom-nav {
     padding-inline: 4px;
+  }
+
+  .mobile-brand {
+    gap: 7px;
+  }
+
+  .field-grid,
+  .expense-essentials {
+    gap: 10px;
+  }
+
+  .field input,
+  .field select {
+    padding-inline: 10px;
+  }
+
+  .balance-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.025em;
   }
 }

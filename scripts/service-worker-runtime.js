@@ -85,7 +85,7 @@ async function assetResponse(request) {
     const cached = await (await caches.open(name)).match(request);
     if (cached) return cached;
   }
-  return fetch(request);
+  return boundedFetch(request);
 }
 
 self.addEventListener("fetch", (event) => {
