@@ -1,5 +1,5 @@
 /* Replaced by finalize-build.mjs with the exact fingerprint and built assets. */
-const BUILD_VERSION = "30d2f87daeeb5b3d";
+const BUILD_VERSION = "9b84ccbee3ef07cf";
 const PRECACHE_FILES = ["index.html","assets/gate-ambient-BnMaWGMw.webp","assets/index-CLjREuIL.css","assets/index-t8fGSBNF.js","manifest.webmanifest","icon-192.png"];
 const CACHE_PREFIX = "tricount-brazil-shell-";
 const CACHE_NAME = `${CACHE_PREFIX}${BUILD_VERSION}`;
